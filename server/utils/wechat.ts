@@ -34,11 +34,11 @@ export const getWechatAuthUrl = (redirectUri: string, state: string): string => 
     appid: wechatAppId,
     redirect_uri: redirectUri,
     response_type: 'code',
-    scope: 'snsapi_login',
+    scope: 'snsapi_userinfo',
     state,
   })
 
-  return `https://open.weixin.qq.com/connect/qrconnect?${params.toString()}#wechat_redirect`
+  return `https://open.weixin.qq.com/connect/oauth2/authorize?${params.toString()}#wechat_redirect`
 }
 
 /**
