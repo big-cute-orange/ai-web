@@ -1,5 +1,5 @@
 import { createClient } from '@libsql/client'
-import { drizzle } from 'drizzle-orm/better-sqlite3'
+import { drizzle } from 'drizzle-orm/libsql'
 import * as schema from '../db/schema'
 
 // 数据库文件路径
