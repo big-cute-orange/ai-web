@@ -53,7 +53,11 @@ export default defineEventHandler(async (event) => {
   }
 
   // 3. 检查用户名是否已存在
-  const existingUser = db.select().from(users).where(eq(users.username, username.trim())).get()
+  const existingUser = await db
+    .select()
+    .from(users)
+    .where(eq(users.username, username.trim()))
+    .get()
 
   if (existingUser) {
     throw createError({
@@ -66,11 +70,14 @@ export default defineEventHandler(async (event) => {
   const hashedPassword = await hashPassword(password)
 
   // 5. 写入数据库
-  const result = db
+  const result = await db
     .insert(users)
     .values({
       username: username.trim(),
       password: hashedPassword,
+      loginType: 'password',
+      nickname: username.trim(),
+      avatarUrl: null,
     })
     .returning()
     .get()

@@ -15,7 +15,7 @@ interface AuthUser {
  *   const user = await requireAuth(event)
  *   console.log(user.userId) // 当前登录用户的 ID
  */
-export async function requireAuth(event: any): Promise<AuthUser> {
+export const requireAuth = async (event: any): Promise<AuthUser> => {
   const authHeader = getHeader(event, 'Authorization')
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     throw createError({

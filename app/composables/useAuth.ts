@@ -1,6 +1,9 @@
 interface User {
   id: number
   username: string
+  nickname?: string
+  avatarUrl?: string | null
+  loginType?: string
   createdAt: string
 }
 

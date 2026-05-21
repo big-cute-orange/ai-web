@@ -10,10 +10,10 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@libsql/client": "^0.17.3",
     "@nuxt/eslint": "1.15.2",
     "@nuxt/ui": "4.7.1",
     "bcryptjs": "^3.0.3",
-    "better-sqlite3": "^12.10.0",
     "drizzle-orm": "^0.45.2",
     "eslint": "^10.4.0",
     "highlight.js": "^11.11.1",
@@ -27,7 +27,6 @@
   },
   "devDependencies": {
     "@types/bcryptjs": "^3.0.0",
-    "@types/better-sqlite3": "^7.6.13",
     "@types/markdown-it": "^14.1.2",
     "drizzle-kit": "^0.31.10"
   }

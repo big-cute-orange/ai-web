@@ -26,7 +26,7 @@ const SALT_ROUNDS = 10
  * @param password 明文密码
  * @returns 哈希后的密码字符串
  */
-export async function hashPassword(password: string): Promise<string> {
+export const hashPassword = async (password: string): Promise<string> => {
   return bcrypt.hash(password, SALT_ROUNDS)
 }
 
@@ -36,7 +36,7 @@ export async function hashPassword(password: string): Promise<string> {
  * @param hash 数据库中存储的哈希密码
  * @returns 是否匹配
  */
-export async function verifyPassword(password: string, hash: string): Promise<boolean> {
+export const verifyPassword = async (password: string, hash: string): Promise<boolean> => {
   return bcrypt.compare(password, hash)
 }
 
@@ -47,7 +47,7 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
  * @param userId 用户 ID
  * @returns JWT 字符串
  */
-export async function generateToken(userId: number): Promise<string> {
+export const generateToken = async (userId: number): Promise<string> => {
   return new SignJWT({ userId })
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
@@ -60,7 +60,7 @@ export async function generateToken(userId: number): Promise<string> {
  * @param token JWT 字符串
  * @returns payload（包含 userId）或 null（无效/过期）
  */
-export async function verifyToken(token: string): Promise<{ userId: number } | null> {
+export const verifyToken = async (token: string): Promise<{ userId: number } | null> => {
   try {
     const { payload } = await jwtVerify(token, JWT_SECRET)
     return payload as { userId: number }

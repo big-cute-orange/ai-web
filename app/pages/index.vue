@@ -112,6 +112,38 @@
         </UButton>
       </form>
 
+      <!-- ====== 微信登录分割线 ====== -->
+      <div class="divider">
+        <span class="divider-text">其他登录方式</span>
+      </div>
+
+      <!-- ====== 微信登录按钮 ====== -->
+      <UButton
+        color="success"
+        variant="outline"
+        block
+        size="lg"
+        class="wechat-btn"
+        @click="handleWechatLogin"
+      >
+        <svg
+          class="wechat-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+        >
+          <path
+            d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.704-1.414 3.973-2.098 6.32-2.193a9.446 9.446 0 0 0-.482-1.573C16.324 3.606 12.868 2.19 8.69 2.189Zm3.415 8.358c-.311.002-.565-.243-.565-.553 0-.31.254-.553.565-.553.305-.018.572.238.565.553.006.311-.255.555-.565.553Zm-4.16 0c-.309-.023-.571-.264-.565-.572.004-.31.258-.555.567-.554.31.001.566.245.565.554a.563.563 0 0 1-.567.572Z"
+          />
+          <path
+            d="M24 16.147c0-3.081-2.892-5.587-6.468-5.587-3.569 0-6.468 2.506-6.468 5.587 0 3.081 2.899 5.587 6.468 5.587a7.86 7.86 0 0 0 2.17-.306l1.457.862a.255.255 0 0 0 .128.04.223.223 0 0 0 .223-.223c0-.053-.011-.106-.037-.16l-.302-1.141a.466.466 0 0 1 .167-.512c1.424-1.061 2.662-2.498 2.662-4.147Zm-5.316-1.334c.307.008.56.25.554.556a.556.556 0 0 1-.554.556.56.56 0 0 1-.557-.556.557.557 0 0 1 .557-.556Zm-3.339 0c.308.001.558.25.553.556a.557.557 0 0 1-.553.556.551.551 0 0 1-.558-.551.556.556 0 0 1 .558-.561Z"
+          />
+        </svg>
+        微信扫码登录
+      </UButton>
+
       <p class="switch-hint">
         {{ activeTab === 'login' ? '还没有账号？' : '已有账号？' }}
         <button
@@ -211,6 +243,10 @@ const handleSubmit = async () => {
   } finally {
     submitting.value = false
   }
+}
+
+const handleWechatLogin = () => {
+  window.location.href = '/api/auth/wechat/login'
 }
 </script>
 
@@ -466,5 +502,41 @@ const handleSubmit = async () => {
   to {
     transform: rotate(360deg);
   }
+}
+
+/* ====== 微信登录 ====== */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 1.5rem 0 1rem;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #e2e8f0;
+}
+
+.divider-text {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+.wechat-btn {
+  border-radius: 12px !important;
+  border-color: #22c55e !important;
+  color: #16a34a !important;
+}
+
+.wechat-btn:hover {
+  background: #f0fdf4 !important;
+}
+
+.wechat-icon {
+  flex-shrink: 0;
 }
 </style>

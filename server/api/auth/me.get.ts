@@ -40,7 +40,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // 3. 查找用户
-  const user = db.select().from(users).where(eq(users.id, payload.userId)).get()
+  const user = await db.select().from(users).where(eq(users.id, payload.userId)).get()
 
   if (!user) {
     throw createError({
@@ -53,6 +53,9 @@ export default defineEventHandler(async (event) => {
   return {
     id: user.id,
     username: user.username,
+    nickname: user.nickname || user.username,
+    avatarUrl: user.avatarUrl,
+    loginType: user.loginType,
     createdAt: user.createdAt,
   }
 })

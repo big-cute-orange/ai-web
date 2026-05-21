@@ -8,6 +8,8 @@ export default defineNuxtConfig({
     apiKey: '',
     aiBaseUrl: '',
     jwtSecret: '',
+    wechatAppId: '',
+    wechatAppSecret: '',
   },
   nitro: {
     experimental: {

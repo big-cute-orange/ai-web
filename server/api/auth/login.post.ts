@@ -31,12 +31,20 @@ export default defineEventHandler(async (event) => {
   }
 
   // 2. 查找用户
-  const user = db.select().from(users).where(eq(users.username, username)).get()
+  const user = await db.select().from(users).where(eq(users.username, username)).get()
 
   if (!user) {
     throw createError({
       statusCode: 401,
       message: '用户名或密码错误',
+    })
+  }
+
+  // 微信注册的用户不能通过密码登录
+  if (user.loginType === 'wechat') {
+    throw createError({
+      statusCode: 401,
+      message: '该账号为微信注册，请使用微信扫码登录',
     })
   }
 

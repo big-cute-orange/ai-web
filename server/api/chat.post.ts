@@ -1,6 +1,6 @@
 // server/api/chat.post.ts
 import { defineEventHandler, readBody, createError, sendStream, setResponseHeaders } from 'h3'
-import { requireAuth } from '~~/server/utils/authGuard'
+import { requireAuth } from '~~/server/utils/requireAuth'
 
 interface Message {
   role: 'system' | 'user' | 'assistant'
@@ -48,7 +48,7 @@ export default defineEventHandler(async (event) => {
   setResponseHeaders(event, {
     'Content-Type': 'text/event-stream; charset=utf-8',
     'Cache-Control': 'no-cache, no-transform',
-    'Connection': 'keep-alive',
+    Connection: 'keep-alive',
     'X-Accel-Buffering': 'no',
   })
 

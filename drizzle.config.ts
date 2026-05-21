@@ -4,8 +4,10 @@ export default defineConfig({
   out: './server/db/migrations',
   schema: './server/db/schema.ts',
   dialect: 'sqlite',
+  driver: 'turso',
   dbCredentials: {
-    url: './server/db/sqlite.db',
+    url: process.env.TURSO_DATABASE_URL ?? 'file:./server/db/sqlite.db',
+    authToken: process.env.TURSO_AUTH_TOKEN,
   },
 })
 
