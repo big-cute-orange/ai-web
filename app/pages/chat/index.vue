@@ -1,6 +1,31 @@
-<!-- pages/chat.vue -->
 <template>
   <div class="chat-container">
+    <!-- 顶部用户栏 -->
+    <header class="top-bar">
+      <div class="user-info">
+        <div class="user-avatar">{{ userInitial }}</div>
+        <span class="user-name">{{ displayName }}</span>
+      </div>
+      <button class="logout-btn" :disabled="loggingOut" @click="handleLogout">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+          <polyline points="16 17 21 12 16 7" />
+          <line x1="21" y1="12" x2="9" y2="12" />
+        </svg>
+        <span>退出登录</span>
+      </button>
+    </header>
+
     <!-- 消息展示区域 -->
     <div ref="messagesAreaRef" class="messages-area">
       <!-- 空状态欢迎页 -->
@@ -22,11 +47,7 @@
       </div>
 
       <!-- 消息列表 -->
-      <div
-        v-for="(message, index) in messages"
-        :key="index"
-        :class="['message', message.role]"
-      >
+      <div v-for="(message, index) in messages" :key="index" :class="['message', message.role]">
         <div class="avatar" :class="message.role">
           {{ message.role === 'user' ? '我' : 'AI' }}
         </div>
@@ -93,7 +114,17 @@ definePageMeta({
   middleware: 'auth',
 })
 
-const { authFetch } = useAuth()
+const { authFetch, currentUser, logout } = useAuth()
+
+const displayName = computed(() => currentUser.value?.nickname || currentUser.value?.username || '')
+const userInitial = computed(() => displayName.value.charAt(0).toUpperCase() || '?')
+
+const loggingOut = ref(false)
+const handleLogout = async () => {
+  loggingOut.value = true
+  logout()
+  await navigateTo('/', { replace: true })
+}
 
 const messages = ref<any[]>([])
 const userInput = ref('')
@@ -132,7 +163,7 @@ const useSuggestion = (s: { text: string }) => {
 }
 
 watch(
-  () => messages.value.map(m => m.content).join(''),
+  () => messages.value.map((m: any) => m.content).join(''),
   () => scrollToBottom(),
 )
 
@@ -241,9 +272,68 @@ const sendMessage = async () => {
   flex-direction: column;
   background: #ffffff;
   font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
-    'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei', sans-serif;
   color: #1f2937;
+}
+
+/* 顶部用户栏 */
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.5rem;
+  border-bottom: 1px solid #f1f5f9;
+  background: #fff;
+  flex-shrink: 0;
+}
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.user-name {
+  font-size: 0.9rem;
+  color: #334155;
+  font-weight: 500;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.logout-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #64748b;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.logout-btn:hover:not(:disabled) {
+  color: #dc2626;
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+.logout-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* 消息区 */
@@ -384,7 +474,9 @@ const sendMessage = async () => {
   border: 1px solid #e5e7eb;
   border-radius: 1.25rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 .input-wrapper:focus-within {
   border-color: #6366f1;
@@ -418,7 +510,9 @@ const sendMessage = async () => {
   justify-content: center;
   cursor: pointer;
   flex-shrink: 0;
-  transition: transform 0.1s ease, opacity 0.15s ease;
+  transition:
+    transform 0.1s ease,
+    opacity 0.15s ease;
 }
 .send-btn:hover:not(:disabled) {
   transform: scale(1.05);
