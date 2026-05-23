@@ -1,27 +1,24 @@
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core'
+import { pgTable, text, serial, timestamp } from 'drizzle-orm/pg-core'
 
 // 从 Drizzle 里拿工具：
-// sqliteTable：建表
+// pgTable：建表
 // text：字符串类型
-// integer：数字类型
+// serial：自增数字类型
+// timestamp：时间戳类型
 
 /**
  * 用户表
  * 存储所有注册用户的信息
  */
-export const users = sqliteTable('users', {
+export const users = pgTable('users', {
   // 主键，自增数字
-  id: integer('id').primaryKey({ autoIncrement: true }),
+  id: serial('id').primaryKey(),
   // 用户名，不可为空，不可重复，微信用户自动生成 wx_xxxxxxxx
   username: text('username').notNull().unique(),
   // 密码哈希（微信用户存空字符串 ''）
-  password: text('password')
-    .notNull()
-    .$default(() => ''),
+  password: text('password').notNull().default(''),
   // 登录方式，'password' 或 'wechat'（微信登录）
-  loginType: text('login_type')
-    .notNull()
-    .$default(() => 'password'),
+  loginType: text('login_type').notNull().default('password'),
   // 微信 openid
   wechatOpenid: text('wechat_openid').unique(),
   // 微信 unionid
@@ -34,4 +31,24 @@ export const users = sqliteTable('users', {
   createdAt: text('created_at')
     .notNull()
     .$defaultFn(() => new Date().toISOString()),
+})
+
+/**
+ * 微信扫码登录临时会话表
+ * 替代内存 Map，支持多实例 / Serverless 环境
+ * 每条记录对应一次扫码登录流程，5 分钟后过期
+ */
+export const wechatLoginSessions = pgTable('wechat_login_sessions', {
+  // 登录流程唯一标识，前端用于轮询
+  state: text('state').primaryKey(),
+  // 状态：pending（待扫码）| confirmed（已确认）
+  status: text('status').notNull().default('pending'),
+  // 登录成功后存入的 JWT，供前端轮询时取走
+  token: text('token'),
+  // 过期时间
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  // 创建时间
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .notNull()
+    .$defaultFn(() => new Date()),
 })

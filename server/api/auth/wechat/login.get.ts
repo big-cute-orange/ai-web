@@ -1,37 +1,27 @@
-import { getWechatAuthUrl } from '~~/server/utils/wechat'
+import { getWechatAuthUrl } from '~~/server/services/wechat'
+import { createPendingSession } from '~~/server/services/wechat-session'
 
 /**
  * GET /api/auth/wechat/login
- *
- * 生成微信 OAuth 授权 URL 并 302 重定向，用户浏览器会跳转到微信二维码页面。
- *
- * 流程：
- * 1. 生成随机 state（防 CSRF）
- * 2. state 存入 httpOnly cookie（5 分钟有效）
- * 3. 拼接微信授权 URL 并返回 302 重定向
+ * 前端点击"微信扫码登录"时调用，返回 OAuth URL 和 state
  */
 export default defineEventHandler(async (event) => {
-  const config = useRuntimeConfig()
-
-  // 生成随机 state 防 CSRF
   const state = crypto.randomUUID()
 
-  // state 存入 cookie，回调时校验（httpOnly + 5 分钟过期）
-  setCookie(event, 'wechat_state', state, {
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
-    maxAge: 60 * 5, // 5 分钟
-    path: '/',
-  })
+  await createPendingSession(state)
 
-  // 构建回调地址（http://your-domain/api/auth/wechat/callback）
-  const host = getRequestHost(event)
-  const protocol = getRequestProtocol(event)
-  const redirectUri = `${protocol}://${host}/api/auth/wechat/callback`
+  const config = useRuntimeConfig()
+  const redirectUri =
+    config.wechatRedirectUri ||
+    (() => {
+      const host = getRequestHost(event, { xForwardedHost: true })
+      const protocol = getRequestProtocol(event, { xForwardedProto: true })
+      return `${protocol}://${host}/api/auth/wechat/callback`
+    })()
 
-  // 重定向到微信授权页
+  console.log('[wechat] redirect_uri:', redirectUri)
+
   const authUrl = getWechatAuthUrl(redirectUri, state)
 
-  return sendRedirect(event, authUrl)
+  return { authUrl, state }
 })

@@ -10,6 +10,18 @@ export default defineNuxtConfig({
     jwtSecret: '',
     wechatAppId: '',
     wechatAppSecret: '',
+    wechatRedirectUri: '',
+  },
+  icon: {
+    // 禁用 Google 图标 provider，避免国内网络环境下的请求失败
+    provider: 'iconify',
+  },
+  fonts: {
+    // 禁用所有 Google 相关 provider，避免国内网络环境下的请求失败
+    providers: {
+      google: false,
+      googleicons: false,
+    },
   },
   nitro: {
     experimental: {
@@ -19,6 +31,9 @@ export default defineNuxtConfig({
   vite: {
     optimizeDeps: {
       include: ['highlight.js', 'markdown-it'],
+    },
+    server: {
+      allowedHosts: ['.trycloudflare.com'],
     },
   },
 })

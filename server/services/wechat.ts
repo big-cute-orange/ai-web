@@ -27,7 +27,7 @@ interface WechatError {
 }
 
 /**
- * 生成微信 OAuth 授权页 URL（用户扫码的二维码页面）
+ * 生成微信 OAuth 授权页 URL
  */
 export const getWechatAuthUrl = (redirectUri: string, state: string): string => {
   const params = new URLSearchParams({
@@ -37,7 +37,6 @@ export const getWechatAuthUrl = (redirectUri: string, state: string): string => 
     scope: 'snsapi_userinfo',
     state,
   })
-
   return `https://open.weixin.qq.com/connect/oauth2/authorize?${params.toString()}#wechat_redirect`
 }
 
@@ -54,13 +53,11 @@ export const exchangeCodeForToken = async (code: string): Promise<WechatTokenRes
 
   const response: WechatTokenResponse | WechatError = await $fetch(
     `https://api.weixin.qq.com/sns/oauth2/access_token?${params.toString()}`,
+    { parseResponse: (txt) => JSON.parse(txt) },
   )
 
   if ('errcode' in response && response.errcode !== 0) {
-    throw createError({
-      statusCode: 400,
-      message: `微信授权失败: ${response.errmsg}`,
-    })
+    throw createError({ statusCode: 400, message: `微信授权失败: ${response.errmsg}` })
   }
 
   return response as WechatTokenResponse
@@ -73,20 +70,15 @@ export const getWechatUserInfo = async (
   accessToken: string,
   openid: string,
 ): Promise<WechatUserInfo> => {
-  const params = new URLSearchParams({
-    access_token: accessToken,
-    openid,
-  })
+  const params = new URLSearchParams({ access_token: accessToken, openid })
 
   const response: WechatUserInfo | WechatError = await $fetch(
     `https://api.weixin.qq.com/sns/userinfo?${params.toString()}`,
+    { parseResponse: (txt) => JSON.parse(txt) },
   )
 
   if ('errcode' in response && response.errcode !== 0) {
-    throw createError({
-      statusCode: 400,
-      message: `获取微信用户信息失败: ${response.errmsg}`,
-    })
+    throw createError({ statusCode: 400, message: `获取微信用户信息失败: ${response.errmsg}` })
   }
 
   return response as WechatUserInfo
@@ -94,17 +86,14 @@ export const getWechatUserInfo = async (
 
 /**
  * 根据 openid 生成唯一用户名
- * 格式：wx_ + openid 后 8 位（如重复则追加数字）
  */
 export const generateWechatUsername = (openid: string, existingUsernames: Set<string>): string => {
   const base = 'wx_' + openid.slice(-8).toLowerCase()
   let username = base
   let counter = 1
-
   while (existingUsernames.has(username)) {
     username = `${base}_${counter}`
     counter++
   }
-
   return username
 }

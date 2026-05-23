@@ -1,6 +1,6 @@
-import { db } from '~~/server/utils/db'
+import { db } from '~~/server/db/client'
 import { users } from '~~/server/db/schema'
-import { hashPassword, generateToken } from '~~/server/utils/auth'
+import { hashPassword, generateToken } from '~~/server/services/auth'
 import { eq } from 'drizzle-orm'
 
 /**
@@ -53,11 +53,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // 3. 检查用户名是否已存在
-  const existingUser = await db
-    .select()
-    .from(users)
-    .where(eq(users.username, username.trim()))
-    .get()
+  const [existingUser] = await db.select().from(users).where(eq(users.username, username.trim()))
 
   if (existingUser) {
     throw createError({
@@ -70,7 +66,7 @@ export default defineEventHandler(async (event) => {
   const hashedPassword = await hashPassword(password)
 
   // 5. 写入数据库
-  const result = await db
+  const [result] = await db
     .insert(users)
     .values({
       username: username.trim(),
@@ -80,7 +76,10 @@ export default defineEventHandler(async (event) => {
       avatarUrl: null,
     })
     .returning()
-    .get()
+
+  if (!result) {
+    throw createError({ statusCode: 500, message: '注册失败，请稍后重试' })
+  }
 
   // 6. 生成 JWT Token
   const token = await generateToken(result.id)

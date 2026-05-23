@@ -189,10 +189,27 @@
         </UButton>
       </div>
     </div>
+
+    <!-- ====== 微信扫码登录弹窗 ====== -->
+    <UModal v-model:open="showQrModal" title="微信扫码登录" :ui="{ content: 'sm:max-w-md' }">
+      <template #body>
+        <div class="qr-container">
+          <canvas ref="qrCanvasRef" class="qr-canvas" />
+          <p v-if="qrStatus === 'pending'" class="qr-hint">
+            <span class="qr-spinner" />
+            请使用微信扫描二维码
+          </p>
+          <p v-else-if="qrStatus === 'expired'" class="qr-hint qr-error">
+            二维码已过期，请刷新重试
+          </p>
+        </div>
+      </template>
+    </UModal>
   </div>
 </template>
 
 <script lang="ts" setup>
+import QRCode from 'qrcode'
 /**
  * 首页 — 登录 / 注册 / 聊天入口
  *
@@ -245,9 +262,82 @@ const handleSubmit = async () => {
   }
 }
 
-const handleWechatLogin = () => {
-  window.location.href = '/api/auth/wechat/login'
+// const handleWechatLogin = () => {
+//   window.location.href = '/api/auth/wechat/login'
+// }
+// ========== 微信扫码登录（二维码模式）==========
+const showQrModal = ref(false)
+const qrCanvasRef = ref<HTMLCanvasElement | null>(null)
+const qrStatus = ref<'pending' | 'expired' | 'scanning'>('pending')
+let pollTimer: ReturnType<typeof setInterval> | null = null
+
+const handleWechatLogin = async () => {
+  // 清理上一次可能残留的定时器（多次点击防护）
+  if (pollTimer) {
+    clearInterval(pollTimer)
+    pollTimer = null
+  }
+
+  try {
+    // 1. 调用 API 获取 OAuth URL 和 state
+    const resp = await fetch('/api/auth/wechat/login')
+    const { authUrl, state } = await resp.json()
+
+    // 2. 打开弹窗并重置状态
+    showQrModal.value = true
+    qrStatus.value = 'pending'
+
+    // 3. 等待 DOM 更新后渲染二维码到 canvas
+    await nextTick()
+    if (qrCanvasRef.value) {
+      await QRCode.toCanvas(qrCanvasRef.value, authUrl, { width: 240, margin: 2 })
+    }
+
+    // 4. 开始轮询扫码状态
+    pollTimer = setInterval(async () => {
+      try {
+        const r = await fetch(`/api/auth/wechat/status?state=${state}`)
+        const data = await r.json()
+
+        if (data.status === 'confirmed' && data.token) {
+          // 扫码成功！
+          clearInterval(pollTimer!)
+          pollTimer = null
+          showQrModal.value = false
+
+          // 写入 cookie，刷新用户信息，跳转聊天页
+          auth.token.value = data.token
+          await auth.fetchUser()
+          router.push('/chat')
+        } else if (data.status === 'expired') {
+          clearInterval(pollTimer!)
+          pollTimer = null
+          qrStatus.value = 'expired'
+        }
+      } catch {
+        // 轮询失败，忽略，继续重试
+      }
+    }, 1500)
+  } catch (err: any) {
+    errorMsg.value = err.message || '获取二维码失败'
+  }
 }
+
+// 关闭弹窗时停止轮询
+watch(showQrModal, (val) => {
+  if (!val && pollTimer) {
+    clearInterval(pollTimer)
+    pollTimer = null
+  }
+})
+
+// 组件卸载时停止轮询
+onUnmounted(() => {
+  if (pollTimer) {
+    clearInterval(pollTimer)
+    pollTimer = null
+  }
+})
 </script>
 
 <style scoped>
@@ -538,5 +628,47 @@ const handleWechatLogin = () => {
 
 .wechat-icon {
   flex-shrink: 0;
+}
+
+/* ====== 微信扫码弹窗 ====== */
+.modal-header {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.qr-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem 0;
+}
+
+.qr-canvas {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+}
+
+.qr-hint {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.qr-error {
+  color: #dc2626;
+}
+
+.qr-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #e2e8f0;
+  border-top-color: #22c55e;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
 }
 </style>

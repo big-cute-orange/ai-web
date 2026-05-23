@@ -1,4 +1,5 @@
-import { verifyToken } from '~~/server/utils/auth'
+import { verifyToken } from '~~/server/services/auth'
+import type { H3Event } from 'h3'
 
 interface AuthUser {
   userId: number
@@ -15,7 +16,7 @@ interface AuthUser {
  *   const user = await requireAuth(event)
  *   console.log(user.userId) // 当前登录用户的 ID
  */
-export const requireAuth = async (event: any): Promise<AuthUser> => {
+export const requireAuth = async (event: H3Event): Promise<AuthUser> => {
   const authHeader = getHeader(event, 'Authorization')
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     throw createError({

@@ -1,6 +1,6 @@
-import { db } from '~~/server/utils/db'
+import { db } from '~~/server/db/client'
 import { users } from '~~/server/db/schema'
-import { verifyPassword, generateToken } from '~~/server/utils/auth'
+import { verifyPassword, generateToken } from '~~/server/services/auth'
 import { eq } from 'drizzle-orm'
 
 /**
@@ -31,7 +31,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // 2. 查找用户
-  const user = await db.select().from(users).where(eq(users.username, username)).get()
+  const [user] = await db.select().from(users).where(eq(users.username, username))
 
   if (!user) {
     throw createError({
