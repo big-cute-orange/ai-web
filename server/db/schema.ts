@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp } from 'drizzle-orm/pg-core'
+import { pgTable, text, serial, timestamp, integer, jsonb } from 'drizzle-orm/pg-core'
 
 // 从 Drizzle 里拿工具：
 // pgTable：建表
@@ -28,9 +28,9 @@ export const users = pgTable('users', {
   // 头像 URL
   avatarUrl: text('avatar_url'),
   // 创建时间，默认当前时间
-  createdAt: text('created_at')
+  createdAt: timestamp('created_at', { withTimezone: true })
     .notNull()
-    .$defaultFn(() => new Date().toISOString()),
+    .$defaultFn(() => new Date()),
 })
 
 /**
@@ -48,6 +48,45 @@ export const wechatLoginSessions = pgTable('wechat_login_sessions', {
   // 过期时间
   expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
   // 创建时间
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .notNull()
+    .$defaultFn(() => new Date()),
+})
+
+/** 对话会话表 */
+export const conversations = pgTable('conversations', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').notNull(),
+  title: text('title').notNull().default('新对话'),
+  provider: text('provider').notNull().default('deepseek'), // 'deepseek' | 'qwen'
+  model: text('model').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  updatedAt: timestamp('updated_at', { withTimezone: true })
+    .notNull()
+    .$defaultFn(() => new Date()),
+})
+
+/** 消息记录表（归属于某个对话） */
+export const messages = pgTable('messages', {
+  id: serial('id').primaryKey(),
+  conversationId: integer('conversation_id').notNull(),
+  role: text('role').notNull(), // 'user' | 'assistant' | 'system'
+  content: text('content').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .notNull()
+    .$defaultFn(() => new Date()),
+})
+
+/** 结构化行程表 */
+export const itineraries = pgTable('itineraries', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').notNull(),
+  conversationId: integer('conversation_id'), // 可选关联
+  destination: text('destination').notNull(),
+  totalDays: integer('total_days').notNull(),
+  structuredData: jsonb('structured_data').notNull(), // ItineraryData JSON
   createdAt: timestamp('created_at', { withTimezone: true })
     .notNull()
     .$defaultFn(() => new Date()),
