@@ -1,6 +1,6 @@
 // server/api/chat.post.ts
 import { defineEventHandler, readBody, createError, sendStream, setResponseHeaders } from 'h3'
-import { requireAuth } from '~~/server/utils/requireAuth'
+// import { requireAuth } from '~~/server/utils/auth-guard'
 
 interface Message {
   role: 'system' | 'user' | 'assistant'

@@ -1,173 +1,16 @@
 <template>
-  <div class="page-bg">
-    <!-- 未登录：登录/注册 -->
-    <div v-if="!auth.currentUser.value && !auth.isLoading.value" class="auth-card">
-      <div class="brand">
-        <div class="brand-icon">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="28"
-            height="28"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-          </svg>
-        </div>
-        <h1 class="brand-name">Nuxt Chat</h1>
-        <p class="brand-desc">
-          {{ activeTab === 'login' ? '登录以开始对话' : '创建账号加入我们' }}
-        </p>
+  <div class="chat-container">
+    <!-- 顶部用户栏 -->
+    <header class="top-bar">
+      <div class="user-info">
+        <div class="user-avatar">{{ userInitial }}</div>
+        <span class="user-name">{{ displayName }}</span>
       </div>
-
-      <div class="tabs">
-        <button :class="['tab', { active: activeTab === 'login' }]" @click="activeTab = 'login'">
-          登录
-        </button>
-        <button
-          :class="['tab', { active: activeTab === 'register' }]"
-          @click="activeTab = 'register'"
-        >
-          注册
-        </button>
-        <div
-          class="tab-indicator"
-          :style="{ transform: activeTab === 'register' ? 'translateX(100%)' : 'translateX(0)' }"
-        />
-      </div>
-
-      <form class="form" @submit.prevent="handleSubmit">
-        <div class="field">
-          <label class="label">用户名</label>
-          <div class="input-wrapper">
-            <svg
-              class="input-icon"
-              xmlns="http://www.w3.org/2000/svg"
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-              <circle cx="12" cy="7" r="4" />
-            </svg>
-            <input
-              v-model="form.username"
-              type="text"
-              class="input"
-              placeholder="请输入用户名（3-20位）"
-              required
-              minlength="3"
-              maxlength="20"
-              autocomplete="username"
-            />
-          </div>
-        </div>
-
-        <div class="field">
-          <label class="label">密码</label>
-          <div class="input-wrapper">
-            <svg
-              class="input-icon"
-              xmlns="http://www.w3.org/2000/svg"
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-            </svg>
-            <input
-              v-model="form.password"
-              type="password"
-              class="input"
-              placeholder="请输入密码（6-50位）"
-              required
-              minlength="6"
-              maxlength="50"
-              autocomplete="current-password"
-            />
-          </div>
-        </div>
-
-        <Transition name="fade">
-          <p v-if="errorMsg" class="error">{{ errorMsg }}</p>
-        </Transition>
-
-        <UButton type="submit" :loading="submitting" block size="lg" class="submit-btn">
-          {{ activeTab === 'login' ? '登录' : '注册' }}
-        </UButton>
-      </form>
-
-      <!-- ====== 微信登录分割线 ====== -->
-      <div class="divider">
-        <span class="divider-text">其他登录方式</span>
-      </div>
-
-      <!-- ====== 微信登录按钮 ====== -->
-      <UButton
-        color="success"
-        variant="outline"
-        block
-        size="lg"
-        class="wechat-btn"
-        @click="handleWechatLogin"
-      >
-        <svg
-          class="wechat-icon"
-          xmlns="http://www.w3.org/2000/svg"
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="currentColor"
-        >
-          <path
-            d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.704-1.414 3.973-2.098 6.32-2.193a9.446 9.446 0 0 0-.482-1.573C16.324 3.606 12.868 2.19 8.69 2.189Zm3.415 8.358c-.311.002-.565-.243-.565-.553 0-.31.254-.553.565-.553.305-.018.572.238.565.553.006.311-.255.555-.565.553Zm-4.16 0c-.309-.023-.571-.264-.565-.572.004-.31.258-.555.567-.554.31.001.566.245.565.554a.563.563 0 0 1-.567.572Z"
-          />
-          <path
-            d="M24 16.147c0-3.081-2.892-5.587-6.468-5.587-3.569 0-6.468 2.506-6.468 5.587 0 3.081 2.899 5.587 6.468 5.587a7.86 7.86 0 0 0 2.17-.306l1.457.862a.255.255 0 0 0 .128.04.223.223 0 0 0 .223-.223c0-.053-.011-.106-.037-.16l-.302-1.141a.466.466 0 0 1 .167-.512c1.424-1.061 2.662-2.498 2.662-4.147Zm-5.316-1.334c.307.008.56.25.554.556a.556.556 0 0 1-.554.556.56.56 0 0 1-.557-.556.557.557 0 0 1 .557-.556Zm-3.339 0c.308.001.558.25.553.556a.557.557 0 0 1-.553.556.551.551 0 0 1-.558-.551.556.556 0 0 1 .558-.561Z"
-          />
-        </svg>
-        微信扫码登录
-      </UButton>
-
-      <p class="switch-hint">
-        {{ activeTab === 'login' ? '还没有账号？' : '已有账号？' }}
-        <button
-          class="switch-link"
-          @click="activeTab = activeTab === 'login' ? 'register' : 'login'"
-        >
-          {{ activeTab === 'login' ? '立即注册' : '去登录' }}
-        </button>
-      </p>
-    </div>
-
-    <!-- 加载中 -->
-    <div v-else-if="auth.isLoading.value" class="loading-state">
-      <div class="loading-spinner" />
-      <p>加载中...</p>
-    </div>
-
-    <!-- 已登录 -->
-    <div v-else class="logged-in-card">
-      <div class="brand-icon">
+      <button class="logout-btn" :disabled="loggingOut" @click="handleLogout">
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          width="28"
-          height="28"
+          width="16"
+          height="16"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -175,368 +18,560 @@
           stroke-linecap="round"
           stroke-linejoin="round"
         >
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+          <polyline points="16 17 21 12 16 7" />
+          <line x1="21" y1="12" x2="9" y2="12" />
         </svg>
+        <span>退出登录</span>
+      </button>
+    </header>
+
+    <!-- 消息展示区域 -->
+    <div ref="messagesAreaRef" class="messages-area">
+      <!-- 空状态欢迎页 -->
+      <div v-if="messages.length === 0" class="welcome">
+        <div class="welcome-logo">✨</div>
+        <h1 class="welcome-title">有什么可以帮你的？</h1>
+        <p class="welcome-subtitle">从下面的示例开始，或直接输入你的问题。</p>
+        <div class="welcome-suggestions">
+          <button
+            v-for="(s, i) in suggestions"
+            :key="i"
+            class="suggestion-card"
+            @click="useSuggestion(s)"
+          >
+            <span class="suggestion-icon">{{ s.icon }}</span>
+            <span class="suggestion-text">{{ s.text }}</span>
+          </button>
+        </div>
       </div>
-      <h1 class="brand-name">Nuxt Chat</h1>
-      <p class="welcome">
-        欢迎回来，<span class="username">{{ auth.currentUser.value?.username }}</span>
-      </p>
-      <div class="actions">
-        <UButton to="/chat" size="lg" block>开始聊天</UButton>
-        <UButton color="neutral" variant="ghost" size="lg" block @click="auth.logout()">
-          退出登录
-        </UButton>
+
+      <!-- 消息列表 -->
+      <div v-for="(message, index) in messages" :key="index" :class="['message', message.role]">
+        <div class="avatar" :class="message.role">
+          {{ message.role === 'user' ? '我' : 'AI' }}
+        </div>
+        <div class="message-bubble">
+          <p v-if="message.role === 'user'" class="user-text">{{ message.content }}</p>
+          <ChatMessage v-else :content="message.content" :loading="message.loading" />
+        </div>
       </div>
+    </div>
+
+    <!-- 输入区域 -->
+    <div class="input-area">
+      <div class="input-wrapper">
+        <textarea
+          ref="textareaRef"
+          v-model="userInput"
+          rows="1"
+          placeholder="给 AI 发送消息..."
+          :disabled="isLoading"
+          @keydown.enter.exact.prevent="sendMessage"
+          @input="autoResize"
+        />
+        <button
+          class="send-btn"
+          :disabled="isLoading || !userInput.trim()"
+          aria-label="发送"
+          @click="sendMessage"
+        >
+          <svg
+            v-if="!isLoading"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M22 2 11 13" />
+            <path d="M22 2 15 22l-4-9-9-4 20-7Z" />
+          </svg>
+          <svg
+            v-else
+            class="spinner"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+          </svg>
+        </button>
+      </div>
+      <p class="hint">按 Enter 发送，Shift + Enter 换行</p>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-/**
- * 首页 — 登录 / 注册 / 聊天入口
- *
- * 三种状态：
- * 1. 未登录 → 显示登录/注册表单
- * 2. 加载中 → 显示加载动画
- * 3. 已登录 → 显示欢迎信息和聊天入口
- */
+// definePageMeta({
+//   middleware: 'auth',
+// })
 
-const auth = useAuth()
-const router = useRouter()
+const { authFetch, currentUser, logout } = useAuth()
 
-// 当前选中的标签页：login | register
-const activeTab = ref<'login' | 'register'>('login')
+const displayName = computed(() => currentUser.value?.nickname || currentUser.value?.username || '')
+const userInitial = computed(() => displayName.value.charAt(0).toUpperCase() || '?')
 
-// 表单数据
-const form = reactive({
-  username: '',
-  password: '',
-})
-
-// 是否正在提交
-const submitting = ref(false)
-
-// 错误消息
-const errorMsg = ref('')
-
-// ========== 页面初始化：尝试恢复会话 ==========
-onMounted(() => {
-  auth.fetchUser()
-})
-
-// ========== 提交表单 ==========
-const handleSubmit = async () => {
-  errorMsg.value = ''
-  submitting.value = true
-
-  try {
-    if (activeTab.value === 'login') {
-      await auth.login(form.username, form.password)
-    } else {
-      await auth.register(form.username, form.password)
-    }
-    // 成功后刷新到聊天页
-    router.push('/chat')
-  } catch (err: any) {
-    errorMsg.value = err.message || '操作失败，请重试'
-  } finally {
-    submitting.value = false
-  }
+const loggingOut = ref(false)
+const handleLogout = async () => {
+  loggingOut.value = true
+  logout()
+  await navigateTo('/auth/login', { replace: true })
 }
 
-const handleWechatLogin = () => {
-  window.location.href = '/api/auth/wechat/login'
+const messages = ref<any[]>([])
+const userInput = ref('')
+const isLoading = ref(false)
+
+const messagesAreaRef = ref<HTMLElement | null>(null)
+const textareaRef = ref<HTMLTextAreaElement | null>(null)
+
+const suggestions = [
+  { icon: '💡', text: '帮我想几个周末活动的点子' },
+  { icon: '✍️', text: '用更简洁的方式重写一段文字' },
+  { icon: '🧠', text: '解释一个复杂的概念' },
+  { icon: '🐛', text: '帮我调试一段代码' },
+]
+
+const scrollToBottom = () => {
+  nextTick(() => {
+    const el = messagesAreaRef.value
+    if (el) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' })
+  })
+}
+
+const autoResize = () => {
+  const el = textareaRef.value
+  if (!el) return
+  el.style.height = 'auto'
+  el.style.height = Math.min(el.scrollHeight, 200) + 'px'
+}
+
+const useSuggestion = (s: { text: string }) => {
+  userInput.value = s.text
+  nextTick(() => {
+    autoResize()
+    textareaRef.value?.focus()
+  })
+}
+
+watch(
+  () => messages.value.map((m: any) => m.content).join(''),
+  () => scrollToBottom(),
+)
+
+const sendMessage = async () => {
+  if (!userInput.value.trim() || isLoading.value) return
+
+  messages.value.push({ role: 'user', content: userInput.value })
+  userInput.value = ''
+  nextTick(() => {
+    if (textareaRef.value) textareaRef.value.style.height = 'auto'
+  })
+  const payloadMessages = [...messages.value]
+
+  isLoading.value = true
+  const assistantIndex = messages.value.length
+  messages.value.push({ role: 'assistant', content: '', loading: true })
+  scrollToBottom()
+
+  try {
+    const response = await authFetch('/api/chat', {
+      method: 'POST',
+      body: JSON.stringify({ messages: payloadMessages }),
+    })
+
+    if (!response.ok || !response.body) {
+      throw new Error(`请求失败: ${response.status}`)
+    }
+
+    const reader = response.body.getReader()
+    const decoder = new TextDecoder('utf-8')
+    let buffer = ''
+    let firstChunk = true
+
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+
+      buffer += decoder.decode(value, { stream: true })
+
+      const events = buffer.split('\n\n')
+      buffer = events.pop() ?? ''
+
+      for (const evt of events) {
+        for (const line of evt.split('\n')) {
+          if (!line.startsWith('data:')) continue
+          const data = line.slice(5).trim()
+          if (!data || data === '[DONE]') continue
+          try {
+            const parsed = JSON.parse(data)
+            const delta: string | undefined = parsed.choices?.[0]?.delta?.content
+            if (delta) {
+              if (firstChunk) {
+                messages.value[assistantIndex].loading = false
+                firstChunk = false
+              }
+              messages.value[assistantIndex].content += delta
+            }
+          } catch {
+            //
+          }
+        }
+      }
+    }
+
+    if (buffer.trim()) {
+      for (const line of buffer.split('\n')) {
+        if (!line.startsWith('data:')) continue
+        const data = line.slice(5).trim()
+        if (!data || data === '[DONE]') continue
+        try {
+          const parsed = JSON.parse(data)
+          const delta: string | undefined = parsed.choices?.[0]?.delta?.content
+          if (delta) {
+            if (firstChunk) {
+              messages.value[assistantIndex].loading = false
+              firstChunk = false
+            }
+            messages.value[assistantIndex].content += delta
+          }
+        } catch {
+          //
+        }
+      }
+    }
+
+    if (firstChunk) {
+      messages.value[assistantIndex].loading = false
+    }
+  } catch (error) {
+    console.error('出错了:', error)
+    messages.value[assistantIndex].loading = false
+    messages.value[assistantIndex].content = '抱歉，请求出错了，请稍后再试。'
+  } finally {
+    messages.value[assistantIndex].loading = false
+    isLoading.value = false
+  }
 }
 </script>
 
 <style scoped>
-.page-bg {
+.chat-container {
+  max-width: 860px;
+  margin: 0 auto;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei', sans-serif;
+  color: #1f2937;
+}
+
+/* 顶部用户栏 */
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.5rem;
+  border-bottom: 1px solid #f1f5f9;
+  background: #fff;
+  flex-shrink: 0;
+}
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
-  background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 30%, #eff6ff 70%, #f0f9ff 100%);
+  font-size: 0.85rem;
+  font-weight: 600;
 }
-
-/* ====== 卡片通用 ====== */
-.auth-card,
-.logged-in-card {
-  width: 100%;
-  max-width: 420px;
-  margin: 1rem;
-  padding: 2.5rem;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(12px);
-  box-shadow:
-    0 0 0 1px rgba(0, 0, 0, 0.03),
-    0 8px 40px rgba(0, 0, 0, 0.08);
+.user-name {
+  font-size: 0.9rem;
+  color: #334155;
+  font-weight: 500;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-
-/* ====== 品牌区域 ====== */
-.brand {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
-.brand-icon {
+.logout-btn {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: 56px;
-  height: 56px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, #22c55e, #16a34a);
-  color: white;
+  gap: 0.4rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #64748b;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.logout-btn:hover:not(:disabled) {
+  color: #dc2626;
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+.logout-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 消息区 */
+.messages-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  scroll-behavior: smooth;
+}
+.messages-area::-webkit-scrollbar {
+  width: 8px;
+}
+.messages-area::-webkit-scrollbar-thumb {
+  background: #e5e7eb;
+  border-radius: 4px;
+}
+.messages-area::-webkit-scrollbar-thumb:hover {
+  background: #d1d5db;
+}
+
+/* 欢迎页 */
+.welcome {
+  margin: auto;
+  text-align: center;
+  max-width: 640px;
+  padding: 2rem 1rem;
+  animation: fadeIn 0.4s ease;
+}
+.welcome-logo {
+  font-size: 3rem;
   margin-bottom: 1rem;
 }
-
-.brand-name {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #0f172a;
-  letter-spacing: -0.02em;
-}
-
-.brand-desc {
-  margin-top: 0.5rem;
-  font-size: 0.9rem;
-  color: #94a3b8;
-}
-
-/* ====== 标签页 ====== */
-.tabs {
-  position: relative;
-  display: flex;
-  margin-bottom: 1.75rem;
-  background: #f1f5f9;
-  border-radius: 12px;
-  padding: 4px;
-}
-
-.tab {
-  flex: 1;
-  position: relative;
-  z-index: 1;
-  padding: 0.6rem 1rem;
-  border: none;
-  background: transparent;
-  font-size: 0.9rem;
+.welcome-title {
+  font-size: 1.875rem;
   font-weight: 600;
-  color: #64748b;
-  cursor: pointer;
-  transition: color 0.25s;
-  border-radius: 8px;
+  margin: 0 0 0.5rem;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
-
-.tab.active {
-  color: #0f172a;
-}
-
-.tab-indicator {
-  position: absolute;
-  top: 4px;
-  left: 4px;
-  width: calc(50% - 4px);
-  height: calc(100% - 8px);
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* ====== 表单 ====== */
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-}
-
-.label {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #475569;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.input-wrapper {
-  position: relative;
-}
-
-.input-icon {
-  position: absolute;
-  left: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #94a3b8;
-  pointer-events: none;
-  transition: color 0.2s;
-}
-
-.input-wrapper:focus-within .input-icon {
-  color: #22c55e;
-}
-
-.input {
-  width: 100%;
-  padding: 0.8rem 1rem 0.8rem 2.75rem;
-  border: 1.5px solid #e2e8f0;
-  border-radius: 12px;
+.welcome-subtitle {
+  color: #6b7280;
+  margin: 0 0 2rem;
   font-size: 0.95rem;
-  background: white;
-  outline: none;
-  transition: all 0.2s;
-  box-sizing: border-box;
 }
-
-.input::placeholder {
-  color: #cbd5e1;
+.welcome-suggestions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
 }
-
-.input:focus {
-  border-color: #22c55e;
-  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.12);
-}
-
-.submit-btn {
-  margin-top: 0.25rem;
-  border-radius: 12px !important;
-}
-
-/* ====== 错误提示 ====== */
-.error {
-  color: #dc2626;
-  font-size: 0.85rem;
-  text-align: center;
-  padding: 0.6rem 1rem;
-  background: #fef2f2;
-  border-radius: 10px;
-  border: 1px solid #fecaca;
-}
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.2s;
-}
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-
-/* ====== 底部切换 ====== */
-.switch-hint {
-  text-align: center;
-  margin-top: 1.5rem;
-  font-size: 0.85rem;
-  color: #94a3b8;
-}
-
-.switch-link {
-  background: none;
-  border: none;
-  color: #22c55e;
-  font-weight: 600;
+.suggestion-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
   cursor: pointer;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
+  color: #374151;
+  text-align: left;
+  transition: all 0.15s ease;
+}
+.suggestion-card:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  transform: translateY(-1px);
+}
+.suggestion-icon {
+  font-size: 1.25rem;
 }
 
-.switch-link:hover {
-  text-decoration: underline;
-}
-
-/* ====== 已登录 ====== */
-.logged-in-card {
-  text-align: center;
+/* 消息 */
+.message {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
+  align-items: flex-start;
+  animation: slideIn 0.3s ease;
 }
-
-.welcome {
-  font-size: 1rem;
-  color: #64748b;
-  margin-bottom: 0.5rem;
+.message.user {
+  flex-direction: row-reverse;
 }
-
-.username {
-  font-weight: 700;
-  color: #22c55e;
-}
-
-.actions {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-top: 0.75rem;
-}
-
-/* ====== 加载 ====== */
-.loading-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-  color: #64748b;
-}
-
-.loading-spinner {
+.avatar {
   width: 36px;
   height: 36px;
-  border: 3px solid #e2e8f0;
-  border-top-color: #22c55e;
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  flex-shrink: 0;
+  color: #fff;
+}
+.avatar.user {
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+}
+.avatar.assistant {
+  background: linear-gradient(135deg, #8b5cf6, #ec4899);
+}
+.message-bubble {
+  max-width: 75%;
+  padding: 0.75rem 1rem;
+  border-radius: 1rem;
+  background: #f3f4f6;
+  line-height: 1.6;
+  word-break: break-word;
+}
+.message.user .message-bubble {
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  color: #fff;
+  border-bottom-right-radius: 0.25rem;
+}
+.message.assistant .message-bubble {
+  border-bottom-left-radius: 0.25rem;
+}
+.user-text {
+  margin: 0;
+  white-space: pre-wrap;
 }
 
+/* 输入区 */
+.input-area {
+  padding: 1rem 1.5rem 1.25rem;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), #fff 30%);
+}
+.input-wrapper {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  padding: 0.5rem 0.5rem 0.5rem 1rem;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 1.25rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+.input-wrapper:focus-within {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+.input-wrapper textarea {
+  flex: 1;
+  border: none;
+  outline: none;
+  resize: none;
+  font: inherit;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  background: transparent;
+  padding: 0.5rem 0;
+  max-height: 200px;
+  color: inherit;
+}
+.input-wrapper textarea::placeholder {
+  color: #9ca3af;
+}
+.send-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition:
+    transform 0.1s ease,
+    opacity 0.15s ease;
+}
+.send-btn:hover:not(:disabled) {
+  transform: scale(1.05);
+}
+.send-btn:disabled {
+  background: #d1d5db;
+  cursor: not-allowed;
+}
+.send-btn svg {
+  width: 18px;
+  height: 18px;
+}
+.spinner {
+  animation: spin 0.8s linear infinite;
+}
+.hint {
+  text-align: center;
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin: 0.5rem 0 0;
+}
+
+/* 动画 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 @keyframes spin {
   to {
     transform: rotate(360deg);
   }
 }
 
-/* ====== 微信登录 ====== */
-.divider {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin: 1.5rem 0 1rem;
-}
-
-.divider::before,
-.divider::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: #e2e8f0;
-}
-
-.divider-text {
-  font-size: 0.8rem;
-  color: #94a3b8;
-  white-space: nowrap;
-}
-
-.wechat-btn {
-  border-radius: 12px !important;
-  border-color: #22c55e !important;
-  color: #16a34a !important;
-}
-
-.wechat-btn:hover {
-  background: #f0fdf4 !important;
-}
-
-.wechat-icon {
-  flex-shrink: 0;
+/* 移动端适配 */
+@media (max-width: 640px) {
+  .welcome-suggestions {
+    grid-template-columns: 1fr;
+  }
+  .message-bubble {
+    max-width: 85%;
+  }
+  .messages-area {
+    padding: 1rem;
+  }
 }
 </style>

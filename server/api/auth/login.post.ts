@@ -1,7 +1,8 @@
-import { db } from '~~/server/utils/db'
-import { users } from '~~/server/db/schema'
-import { verifyPassword, generateToken } from '~~/server/utils/auth'
 import { eq } from 'drizzle-orm'
+import { db } from '~~/server/db'
+import { users } from '~~/server/db/schema'
+// import { verifyPassword } from '~~/server/utils/password'
+// import { generateToken } from '~~/server/utils/jwt'
 
 /**
  * 登录接口
@@ -31,12 +32,12 @@ export default defineEventHandler(async (event) => {
   }
 
   // 2. 查找用户
-  const user = await db.select().from(users).where(eq(users.username, username)).get()
+  const [user] = await db.select().from(users).where(eq(users.username, username))
 
   if (!user) {
     throw createError({
       statusCode: 401,
-      message: '用户名或密码错误',
+      message: '用户名不存在',
     })
   }
 

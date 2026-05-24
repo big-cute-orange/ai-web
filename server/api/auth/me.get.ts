@@ -1,7 +1,7 @@
-import { db } from '~~/server/utils/db'
-import { users } from '~~/server/db/schema'
-import { verifyToken } from '~~/server/utils/auth'
 import { eq } from 'drizzle-orm'
+import { db } from '~~/server/db'
+import { users } from '~~/server/db/schema'
+// import { verifyToken } from '~~/server/utils/jwt'
 
 /**
  * 获取当前登录用户信息
@@ -40,7 +40,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // 3. 查找用户
-  const user = await db.select().from(users).where(eq(users.id, payload.userId)).get()
+  const [user] = await db.select().from(users).where(eq(users.id, payload.userId))
 
   if (!user) {
     throw createError({
