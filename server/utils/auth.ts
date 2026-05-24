@@ -1,5 +1,5 @@
-import { verifyToken } from '~~/server/services/auth'
 import type { H3Event } from 'h3'
+import { verifyToken } from '~~/server/utils/jwt'
 
 interface AuthUser {
   userId: number

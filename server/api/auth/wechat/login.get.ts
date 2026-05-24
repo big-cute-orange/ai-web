@@ -1,5 +1,5 @@
-import { getWechatAuthUrl } from '~~/server/services/wechat'
-import { createPendingSession } from '~~/server/services/wechat-session'
+import { getWechatAuthUrl } from '~~/server/services/wechat/oauth'
+import { createPendingSession } from '~~/server/services/wechat/session'
 
 /**
  * GET /api/auth/wechat/login

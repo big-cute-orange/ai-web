@@ -1,12 +1,12 @@
 import { eq, lt } from 'drizzle-orm'
-import { db } from '../db/client'
-import { wechatLoginSessions } from '../db/schema'
+import { db } from '~~/server/db'
+import { wechatLoginSessions } from '~~/server/db/schema'
 
 /**
  * 微信扫码登录会话管理（DB 版）
- * 替代原来的内存 Map，支持 Serverless 多实例环境。
- * 手机端回调和桌面端轮询可能落在不同的函数实例上，
- * 通过数据库共享状态保证两端都能读写同一条记录。
+ * 替代原来的内存 Map，支持 Serverless 多实例环境
+ * 手机端回调和桌面端轮询可能落在不同的函数实例上
+ * 通过数据库共享状态保证两端都能读写同一条记录
  */
 
 /** 创建一个 pending 状态的登录会话，有效期 5 分钟 */

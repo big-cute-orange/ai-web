@@ -1,7 +1,8 @@
-import { db } from '~~/server/db/client'
-import { users } from '~~/server/db/schema'
-import { hashPassword, generateToken } from '~~/server/services/auth'
 import { eq } from 'drizzle-orm'
+import { db } from '~~/server/db'
+import { users } from '~~/server/db/schema'
+// import { hashPassword } from '~~/server/utils/password'
+// import { generateToken } from '~~/server/utils/jwt'
 
 /**
  * 注册接口

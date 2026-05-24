@@ -1,4 +1,4 @@
-import { getSession } from '~~/server/services/wechat-session'
+import { getSession } from '~~/server/services/wechat/session'
 
 /**
  * GET /api/auth/wechat/status?state=xxx

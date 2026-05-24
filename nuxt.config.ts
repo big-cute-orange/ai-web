@@ -28,9 +28,12 @@ export default defineNuxtConfig({
       wasm: true,
     },
   },
+  // 项目里用到了 qrcode / markdown-it / highlight.js 等这类第三方包
+  // Vite 开发时每次热更，会重新解析它们，导致页面偶尔闪一下 / 重新加载
+  // 把它们放进 nuxt.config.ts 里提前打包好，开发环境会更丝滑、不闪屏
   vite: {
     optimizeDeps: {
-      include: ['highlight.js', 'markdown-it'],
+      include: ['highlight.js', 'markdown-it', 'qrcode'],
     },
     server: {
       allowedHosts: ['.trycloudflare.com'],

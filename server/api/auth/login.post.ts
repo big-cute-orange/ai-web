@@ -1,7 +1,8 @@
-import { db } from '~~/server/db/client'
-import { users } from '~~/server/db/schema'
-import { verifyPassword, generateToken } from '~~/server/services/auth'
 import { eq } from 'drizzle-orm'
+import { db } from '~~/server/db'
+import { users } from '~~/server/db/schema'
+// import { verifyPassword } from '~~/server/utils/password'
+// import { generateToken } from '~~/server/utils/jwt'
 
 /**
  * 登录接口
@@ -36,7 +37,7 @@ export default defineEventHandler(async (event) => {
   if (!user) {
     throw createError({
       statusCode: 401,
-      message: '用户名或密码错误',
+      message: '用户名不存在',
     })
   }
 

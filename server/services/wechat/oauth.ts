@@ -53,7 +53,7 @@ export const exchangeCodeForToken = async (code: string): Promise<WechatTokenRes
 
   const response: WechatTokenResponse | WechatError = await $fetch(
     `https://api.weixin.qq.com/sns/oauth2/access_token?${params.toString()}`,
-    { parseResponse: (txt) => JSON.parse(txt) },
+    { parseResponse: (txt: string) => JSON.parse(txt) },
   )
 
   if ('errcode' in response && response.errcode !== 0) {
@@ -74,7 +74,7 @@ export const getWechatUserInfo = async (
 
   const response: WechatUserInfo | WechatError = await $fetch(
     `https://api.weixin.qq.com/sns/userinfo?${params.toString()}`,
-    { parseResponse: (txt) => JSON.parse(txt) },
+    { parseResponse: (txt: string) => JSON.parse(txt) },
   )
 
   if ('errcode' in response && response.errcode !== 0) {

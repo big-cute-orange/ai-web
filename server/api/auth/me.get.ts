@@ -1,7 +1,7 @@
-import { db } from '~~/server/db/client'
-import { users } from '~~/server/db/schema'
-import { verifyToken } from '~~/server/services/auth'
 import { eq } from 'drizzle-orm'
+import { db } from '~~/server/db'
+import { users } from '~~/server/db/schema'
+// import { verifyToken } from '~~/server/utils/jwt'
 
 /**
  * 获取当前登录用户信息

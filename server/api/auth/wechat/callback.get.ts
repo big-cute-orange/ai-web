@@ -1,13 +1,13 @@
-import { db } from '~~/server/db/client'
+import { eq } from 'drizzle-orm'
+import { db } from '~~/server/db'
 import { users } from '~~/server/db/schema'
-import { generateToken } from '~~/server/services/auth'
 import {
   exchangeCodeForToken,
   getWechatUserInfo,
   generateWechatUsername,
-} from '~~/server/services/wechat'
-import { confirmSession, getSession } from '~~/server/services/wechat-session'
-import { eq } from 'drizzle-orm'
+} from '~~/server/services/wechat/oauth'
+import { confirmSession, getSession } from '~~/server/services/wechat/session'
+// import { generateToken } from '~~/server/utils/jwt'
 
 /**
  * GET /api/auth/wechat/callback
