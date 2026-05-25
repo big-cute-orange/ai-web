@@ -1,12 +1,3 @@
-interface User {
-  id: number
-  username: string
-  nickname?: string
-  avatarUrl?: string | null
-  loginType?: string
-  createdAt: string
-}
-
 export const useAuth = () => {
   const token = useCookie('auth_token')
   const currentUser = useState<User | null>('auth_user', () => null)

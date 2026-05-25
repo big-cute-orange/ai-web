@@ -37,7 +37,7 @@ export default defineEventHandler(async (event) => {
   if (!user) {
     throw createError({
       statusCode: 401,
-      message: '用户名不存在',
+      message: '用户名或密码错误',
     })
   }
 

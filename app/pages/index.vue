@@ -6,6 +6,27 @@
         <div class="user-avatar">{{ userInitial }}</div>
         <span class="user-name">{{ displayName }}</span>
       </div>
+      <!-- 新对话按钮：清空消息并重置 conversationId -->
+      <button class="new-chat-btn" @click="newConversation">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
+        <span>新对话</span>
+      </button>
+      <!-- Provider 切换下拉框 -->
+      <select v-model="selectedProvider" class="provider-dropdown" title="切换 AI 模型">
+        <option value="deepseek">DeepSeek</option>
+        <option value="qwen">通义千问</option>
+      </select>
       <button class="logout-btn" :disabled="loggingOut" @click="handleLogout">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -113,47 +134,60 @@
 // definePageMeta({
 //   middleware: 'auth',
 // })
+import type { ProviderName } from '~~/shared/types'
 
-const { authFetch, currentUser, logout } = useAuth()
+const { currentUser, logout } = useAuth()
+// 从 composable 拿数据和核心逻辑
+const {
+  messages,
+  isLoading,
+  newConversation: _newConversation,
+  sendMessage: _sendMessage,
+} = useChat()
+
+// 当前选择的 AI Provider，绑定到页面顶部的下拉框
+const selectedProvider = ref<ProviderName>('deepseek')
 
 const displayName = computed(() => currentUser.value?.nickname || currentUser.value?.username || '')
 const userInitial = computed(() => displayName.value.charAt(0).toUpperCase() || '?')
 
-const loggingOut = ref(false)
-const handleLogout = async () => {
-  loggingOut.value = true
-  logout()
-  await navigateTo('/auth/login', { replace: true })
-}
-
-const messages = ref<any[]>([])
+// 当前对话的 ID（第一条消息发出后，从服务端 meta 事件里获得）
+// null 表示还没有对话（或者用户点了"新对话"按钮）
+// const currentConversationId = ref<number | null>(null)
 const userInput = ref('')
-const isLoading = ref(false)
-
-const messagesAreaRef = ref<HTMLElement | null>(null)
 const textareaRef = ref<HTMLTextAreaElement | null>(null)
 
-const suggestions = [
-  { icon: '💡', text: '帮我想几个周末活动的点子' },
-  { icon: '✍️', text: '用更简洁的方式重写一段文字' },
-  { icon: '🧠', text: '解释一个复杂的概念' },
-  { icon: '🐛', text: '帮我调试一段代码' },
-]
-
-const scrollToBottom = () => {
-  nextTick(() => {
-    const el = messagesAreaRef.value
-    if (el) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' })
-  })
+// 新对话：composable 负责重置状态，页面负责聚焦输入框
+const newConversation = () => {
+  _newConversation()
+  nextTick(() => textareaRef.value?.focus())
 }
 
+// 发消息：composable 负责网络请求，页面负责清空输入框
+const sendMessage = async () => {
+  if (!userInput.value.trim() || isLoading.value) return
+  const content = userInput.value
+  userInput.value = ''
+  nextTick(() => {
+    if (textareaRef.value) textareaRef.value.style.height = 'auto'
+  })
+  await _sendMessage(content, selectedProvider.value)
+}
+
+// 首页的示例建议，点击后会填入输入框，用户可以直接发送或修改后发送
+const suggestions = [
+  { icon: '✈️', text: '帮我规划北京 3 天行程，喜欢历史文化' },
+  { icon: '🏖️', text: '三亚 5 天亲子游，预算 5000 元以内' },
+  { icon: '🗺️', text: '云南大理 → 丽江 → 香格里拉 7 天路线' },
+  { icon: '🍜', text: '成都 2 天美食攻略，不错过任何经典小吃' },
+]
+// 文本框自动增高，最大到 200px
 const autoResize = () => {
   const el = textareaRef.value
   if (!el) return
   el.style.height = 'auto'
   el.style.height = Math.min(el.scrollHeight, 200) + 'px'
 }
-
 const useSuggestion = (s: { text: string }) => {
   userInput.value = s.text
   nextTick(() => {
@@ -162,104 +196,26 @@ const useSuggestion = (s: { text: string }) => {
   })
 }
 
+// 消息列表变化时自动滚到底部
+const messagesAreaRef = ref<HTMLElement | null>(null)
+const scrollToBottom = () => {
+  nextTick(() => {
+    const el = messagesAreaRef.value
+    if (el) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' })
+  })
+}
+// 监听 messages 内容的变化（只要消息文本有变动就滚动），而不是整个 messages 数组（避免每次添加消息都滚动两次）
 watch(
   () => messages.value.map((m: any) => m.content).join(''),
   () => scrollToBottom(),
 )
 
-const sendMessage = async () => {
-  if (!userInput.value.trim() || isLoading.value) return
-
-  messages.value.push({ role: 'user', content: userInput.value })
-  userInput.value = ''
-  nextTick(() => {
-    if (textareaRef.value) textareaRef.value.style.height = 'auto'
-  })
-  const payloadMessages = [...messages.value]
-
-  isLoading.value = true
-  const assistantIndex = messages.value.length
-  messages.value.push({ role: 'assistant', content: '', loading: true })
-  scrollToBottom()
-
-  try {
-    const response = await authFetch('/api/chat', {
-      method: 'POST',
-      body: JSON.stringify({ messages: payloadMessages }),
-    })
-
-    if (!response.ok || !response.body) {
-      throw new Error(`请求失败: ${response.status}`)
-    }
-
-    const reader = response.body.getReader()
-    const decoder = new TextDecoder('utf-8')
-    let buffer = ''
-    let firstChunk = true
-
-    while (true) {
-      const { done, value } = await reader.read()
-      if (done) break
-
-      buffer += decoder.decode(value, { stream: true })
-
-      const events = buffer.split('\n\n')
-      buffer = events.pop() ?? ''
-
-      for (const evt of events) {
-        for (const line of evt.split('\n')) {
-          if (!line.startsWith('data:')) continue
-          const data = line.slice(5).trim()
-          if (!data || data === '[DONE]') continue
-          try {
-            const parsed = JSON.parse(data)
-            const delta: string | undefined = parsed.choices?.[0]?.delta?.content
-            if (delta) {
-              if (firstChunk) {
-                messages.value[assistantIndex].loading = false
-                firstChunk = false
-              }
-              messages.value[assistantIndex].content += delta
-            }
-          } catch {
-            //
-          }
-        }
-      }
-    }
-
-    if (buffer.trim()) {
-      for (const line of buffer.split('\n')) {
-        if (!line.startsWith('data:')) continue
-        const data = line.slice(5).trim()
-        if (!data || data === '[DONE]') continue
-        try {
-          const parsed = JSON.parse(data)
-          const delta: string | undefined = parsed.choices?.[0]?.delta?.content
-          if (delta) {
-            if (firstChunk) {
-              messages.value[assistantIndex].loading = false
-              firstChunk = false
-            }
-            messages.value[assistantIndex].content += delta
-          }
-        } catch {
-          //
-        }
-      }
-    }
-
-    if (firstChunk) {
-      messages.value[assistantIndex].loading = false
-    }
-  } catch (error) {
-    console.error('出错了:', error)
-    messages.value[assistantIndex].loading = false
-    messages.value[assistantIndex].content = '抱歉，请求出错了，请稍后再试。'
-  } finally {
-    messages.value[assistantIndex].loading = false
-    isLoading.value = false
-  }
+// 退出登录：调用 composable 的 logout 方法，清除用户状态，然后跳转到登录页
+const loggingOut = ref(false)
+const handleLogout = async () => {
+  loggingOut.value = true
+  logout()
+  await navigateTo('/auth/login', { replace: true })
 }
 </script>
 
@@ -573,5 +529,42 @@ const sendMessage = async () => {
   .messages-area {
     padding: 1rem;
   }
+}
+
+/* Provider 切换下拉框 */
+.provider-dropdown {
+  padding: 0.3rem 0.6rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.82rem;
+  color: #374151;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+.provider-dropdown:focus,
+.provider-dropdown:hover {
+  border-color: #6366f1;
+}
+
+/* 新对话按钮 */
+.new-chat-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #64748b;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.new-chat-btn:hover {
+  color: #6366f1;
+  border-color: #c7d2fe;
+  background: #eef2ff;
 }
 </style>

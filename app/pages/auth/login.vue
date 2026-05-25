@@ -257,6 +257,8 @@ const handleSubmit = async () => {
   } catch (err: any) {
     errorMsg.value = err.message || '操作失败，请重试'
     submitting.value = false
+  } finally {
+    submitting.value = false
   }
 }
 
@@ -339,7 +341,13 @@ onUnmounted(() => {
   justify-content: center;
   min-height: 100vh;
   padding: 2rem 1rem;
-  background: linear-gradient(160deg, #f0fff4 0%, #f7fafc 50%, #ebf8ff 100%);
+  /* Aether Mint：从浅薄荷渐变到浅灰，柔和的背景 */
+  background: linear-gradient(
+    160deg,
+    var(--color-mint-50) 0%,
+    var(--color-stone-50) 50%,
+    var(--color-mint-50) 100%
+  );
   font-family: var(--font-sans);
 }
 
@@ -370,10 +378,10 @@ onUnmounted(() => {
   width: 52px;
   height: 52px;
   border-radius: 14px;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover));
+  background: linear-gradient(135deg, var(--color-mint-700), var(--color-mint-800));
   color: white;
   margin-bottom: 1rem;
-  box-shadow: 0 4px 12px rgba(72, 187, 120, 0.25);
+  box-shadow: 0 4px 12px rgba(4, 120, 87, 0.25);
 }
 
 .brand-name {
@@ -388,7 +396,7 @@ onUnmounted(() => {
 .brand-tagline {
   margin-top: 0.6rem;
   font-size: 1rem;
-  color: var(--color-neutral-500);
+  color: var(--color-stone-500);
   line-height: 1.5;
 }
 
@@ -416,9 +424,7 @@ onUnmounted(() => {
   padding: 2rem 2rem 1.75rem;
   border-radius: 16px;
   background: #ffffff;
-  box-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.04),
-    0 8px 32px rgba(15, 23, 42, 0.06);
+  box-shadow: var(--shadow-card);
 }
 
 /* ====== 下划线式 Tab ====== */
@@ -426,7 +432,7 @@ onUnmounted(() => {
   position: relative;
   display: flex;
   margin-bottom: 1.75rem;
-  border-bottom: 1px solid var(--color-neutral-200);
+  border-bottom: 1px solid var(--color-stone-200);
 }
 
 .tab {
@@ -438,13 +444,13 @@ onUnmounted(() => {
   background: transparent;
   font-size: 0.95rem;
   font-weight: 600;
-  color: var(--color-neutral-400);
+  color: var(--color-stone-400);
   cursor: pointer;
   transition: color 0.2s;
 }
 
 .tab.active {
-  color: var(--color-primary);
+  color: var(--color-mint-700);
 }
 
 .tab-indicator {
@@ -453,7 +459,7 @@ onUnmounted(() => {
   left: 0;
   width: 50%;
   height: 2px;
-  background: var(--color-primary);
+  background: var(--color-mint-700);
   border-radius: 2px;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -489,7 +495,7 @@ onUnmounted(() => {
   padding: 0;
   font-size: 0.8rem;
   font-weight: 600;
-  color: var(--color-primary);
+  color: var(--color-mint-700);
   cursor: pointer;
 }
 
@@ -506,13 +512,13 @@ onUnmounted(() => {
   left: 14px;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--color-neutral-400);
+  color: var(--color-stone-400);
   pointer-events: none;
   transition: color 0.2s;
 }
 
 .input-wrapper:focus-within .input-icon {
-  color: var(--color-primary);
+  color: var(--color-mint-700);
 }
 
 .input {
@@ -521,7 +527,7 @@ onUnmounted(() => {
   border: 1.5px solid transparent;
   border-radius: 10px;
   font-size: 0.95rem;
-  background: var(--color-neutral-50);
+  background: var(--color-stone-50);
   outline: none;
   transition: all 0.2s;
   box-sizing: border-box;
@@ -529,13 +535,13 @@ onUnmounted(() => {
 }
 
 .input::placeholder {
-  color: var(--color-neutral-400);
+  color: var(--color-stone-400);
 }
 
 .input:focus {
   background: #ffffff;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(72, 187, 120, 0.15);
+  border-color: var(--color-mint-700);
+  box-shadow: 0 0 0 3px rgba(4, 120, 87, 0.15);
 }
 
 .submit-btn {
@@ -548,7 +554,7 @@ onUnmounted(() => {
   padding: 0.75rem 1rem;
   border: none;
   border-radius: 10px;
-  background: var(--color-primary);
+  background: var(--color-mint-700);
   color: #fff;
   font-size: 0.95rem;
   font-weight: 600;
@@ -557,12 +563,12 @@ onUnmounted(() => {
     background 0.2s,
     transform 0.1s,
     box-shadow 0.2s;
-  box-shadow: 0 2px 6px rgba(72, 187, 120, 0.25);
+  box-shadow: 0 2px 6px rgba(4, 120, 87, 0.25);
 }
 
 .submit-btn:hover:not(:disabled) {
-  background: var(--color-primary-hover);
-  box-shadow: 0 4px 10px rgba(72, 187, 120, 0.3);
+  background: var(--color-mint-800);
+  box-shadow: 0 4px 10px rgba(4, 120, 87, 0.3);
 }
 
 .submit-btn:active:not(:disabled) {
@@ -617,12 +623,12 @@ onUnmounted(() => {
   content: '';
   flex: 1;
   height: 1px;
-  background: var(--color-neutral-200);
+  background: var(--color-stone-200);
 }
 
 .divider-text {
   font-size: 0.7rem;
-  color: var(--color-neutral-400);
+  color: var(--color-stone-400);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   white-space: nowrap;
@@ -636,27 +642,27 @@ onUnmounted(() => {
   align-items: center;
   gap: 0.75rem;
   padding: 1.25rem;
-  border: 1px solid var(--color-neutral-200);
+  border: 1px solid var(--color-stone-200);
   border-radius: 12px;
-  background: var(--color-neutral-50);
+  background: var(--color-stone-50);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .wechat-card:hover {
-  border-color: var(--color-primary-border);
-  background: var(--color-primary-soft);
+  border-color: var(--color-mint-300);
+  background: var(--color-mint-50);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(72, 187, 120, 0.1);
+  box-shadow: 0 4px 12px rgba(4, 120, 87, 0.1);
 }
 
 .phone-frame {
   position: relative;
   width: 64px;
   height: 90px;
-  border: 2px solid var(--color-neutral-300);
+  border: 2px solid var(--color-stone-300);
   border-radius: 10px;
-  background: #c6f6d5;
+  background: var(--color-mint-100);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -672,7 +678,7 @@ onUnmounted(() => {
   width: 18px;
   height: 3px;
   border-radius: 2px;
-  background: var(--color-neutral-300);
+  background: var(--color-stone-300);
 }
 
 .phone-screen {
@@ -699,16 +705,16 @@ onUnmounted(() => {
   gap: 0.35rem;
   margin: 0;
   font-size: 0.85rem;
-  color: var(--color-neutral-600);
+  color: var(--color-stone-600);
 }
 
 .wechat-text strong {
-  color: var(--color-primary);
+  color: var(--color-mint-700);
   font-weight: 600;
 }
 
 .wechat-mini-icon {
-  color: var(--color-primary);
+  color: var(--color-mint-700);
   flex-shrink: 0;
 }
 
@@ -718,13 +724,13 @@ onUnmounted(() => {
   margin-top: 1.25rem;
   margin-bottom: 0;
   font-size: 0.85rem;
-  color: var(--color-neutral-400);
+  color: var(--color-stone-400);
 }
 
 .switch-link {
   background: none;
   border: none;
-  color: var(--color-primary);
+  color: var(--color-mint-700);
   font-weight: 600;
   cursor: pointer;
   font-size: 0.85rem;
@@ -741,14 +747,14 @@ onUnmounted(() => {
   flex-direction: column;
   align-items: center;
   gap: 1rem;
-  color: var(--color-neutral-500);
+  color: var(--color-stone-500);
 }
 
 .loading-spinner {
   width: 36px;
   height: 36px;
-  border: 3px solid var(--color-neutral-200);
-  border-top-color: var(--color-primary);
+  border: 3px solid var(--color-stone-200);
+  border-top-color: var(--color-mint-700);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -766,21 +772,21 @@ onUnmounted(() => {
   align-items: center;
   gap: 0.6rem;
   font-size: 0.8rem;
-  color: var(--color-neutral-400);
+  color: var(--color-stone-400);
 }
 
 .page-footer a {
-  color: var(--color-neutral-500);
+  color: var(--color-stone-500);
   text-decoration: none;
   transition: color 0.15s;
 }
 
 .page-footer a:hover {
-  color: var(--color-primary);
+  color: var(--color-mint-700);
 }
 
 .footer-sep {
-  color: var(--color-neutral-300);
+  color: var(--color-stone-300);
 }
 
 /* ====== 微信扫码弹窗 ====== */
@@ -792,14 +798,14 @@ onUnmounted(() => {
 }
 
 .qr-canvas {
-  border: 1px solid var(--color-neutral-200);
+  border: 1px solid var(--color-stone-200);
   border-radius: 12px;
 }
 
 .qr-hint {
   margin-top: 1rem;
   font-size: 0.9rem;
-  color: var(--color-neutral-500);
+  color: var(--color-stone-500);
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -813,8 +819,8 @@ onUnmounted(() => {
   display: inline-block;
   width: 16px;
   height: 16px;
-  border: 2px solid var(--color-neutral-200);
-  border-top-color: var(--color-primary);
+  border: 2px solid var(--color-stone-200);
+  border-top-color: var(--color-mint-700);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
