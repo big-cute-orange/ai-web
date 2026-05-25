@@ -27,3 +27,5 @@ logs
 server/db/sqlite.db
 server/db/sqlite.db-wal
 server/db/sqlite.db-shm
+
+docs/

@@ -1,0 +1,15 @@
+{
+  // Tailwind v4 使用了 @theme / @apply / @source 等自定义 at-rule，
+  // VS Code 内置 CSS 语言服务不认识，会误报 "Unknown at rule"。
+  // 这些规则会被 PostCSS / Tailwind 正常处理，关闭警告即可。
+  "css.lint.unknownAtRules": "ignore",
+  "scss.lint.unknownAtRules": "ignore",
+  "less.lint.unknownAtRules": "ignore",
+
+  // 让 Tailwind CSS IntelliSense 在 .vue / .ts 模板字符串里也工作
+  // （前提：装了 bradlc.vscode-tailwindcss 扩展。没装也不影响。）
+  "tailwindCSS.includeLanguages": {
+    "vue": "html",
+    "vue-html": "html"
+  }
+}
