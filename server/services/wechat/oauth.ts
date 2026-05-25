@@ -1,3 +1,5 @@
+// 文件顶部加一行
+import { ofetch } from 'ofetch'
 const { wechatAppId, wechatAppSecret } = useRuntimeConfig()
 
 interface WechatTokenResponse {
@@ -51,7 +53,7 @@ export const exchangeCodeForToken = async (code: string): Promise<WechatTokenRes
     grant_type: 'authorization_code',
   })
 
-  const response: WechatTokenResponse | WechatError = await $fetch(
+  const response = await ofetch<WechatTokenResponse | WechatError>(
     `https://api.weixin.qq.com/sns/oauth2/access_token?${params.toString()}`,
     { parseResponse: (txt: string) => JSON.parse(txt) },
   )
@@ -72,7 +74,7 @@ export const getWechatUserInfo = async (
 ): Promise<WechatUserInfo> => {
   const params = new URLSearchParams({ access_token: accessToken, openid })
 
-  const response: WechatUserInfo | WechatError = await $fetch(
+  const response = await ofetch<WechatUserInfo | WechatError>(
     `https://api.weixin.qq.com/sns/userinfo?${params.toString()}`,
     { parseResponse: (txt: string) => JSON.parse(txt) },
   )
