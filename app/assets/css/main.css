@@ -4,37 +4,37 @@
 @import 'highlight.js/styles/github-dark.css';
 
 /* ============================================
- * 全局设计 Token
- * 颜色 / 字体 / 阴影等基础变量，所有页面共用
+ * Tailwind v4 主题：通过 @theme 注册的颜色
+ * 自动同时暴露为：
+ *   - CSS 变量：var(--color-mint-500)
+ *   - Utility class：bg-mint-500 / text-mint-500 / border-mint-500
+ *   - Nuxt UI primary：在 app.config.ts 里 colors.primary = 'mint'
  * ============================================ */
-:root {
-  /* ---- 品牌色 ---- */
-  --color-primary: #48bb78;
-  --color-primary-hover: #38a169;
-  --color-primary-soft: #f0fff4;
-  --color-primary-border: #9ae6b4;
+@theme {
+  /* ---- Mint 色阶（主品牌色，Aether Mint 设计系统）---- */
+  --color-mint-50: #ecfdf5;
+  --color-mint-100: #d1fae5;
+  --color-mint-200: #98ffd9; /* 设计图 Primary 浅，强调填充背景 */
+  --color-mint-300: #6ee7b7;
+  --color-mint-400: #34d399;
+  --color-mint-500: #10b981;
+  --color-mint-600: #059669;
+  --color-mint-700: #047857; /* 设计图 Primary 深，实心按钮 */
+  --color-mint-800: #065f46;
+  --color-mint-900: #064e3b;
+  --color-mint-950: #022c22;
 
-  /* ---- 中性色 ---- */
-  --color-secondary: #2d3748;
-  --color-tertiary: #63b3ed;
-  --color-neutral-50: #f7fafc;
-  --color-neutral-100: #edf2f7;
-  --color-neutral-200: #e2e8f0;
-  --color-neutral-300: #cbd5e0;
-  --color-neutral-400: #a0aec0;
-  --color-neutral-500: #718096;
-  --color-neutral-600: #4a5568;
+  /* ---- Secondary / Tertiary 辅助色 ---- */
+  --color-secondary: #1d2129; /* 设计图 Secondary，反色按钮 */
+  --color-tertiary: #ffeb9e; /* 设计图 Tertiary，浅黄强调 */
 
-  /* ---- 状态色 ---- */
-  --color-danger: #e53e3e;
-  --color-danger-soft: #fef2f2;
-  --color-danger-border: #fecaca;
-
-  /* ---- 字体 ---- */
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
-    'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  /* ---- 字体（暂用系统字体栈，后续可接入 web font）---- */
+  --font-sans:
+    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei', sans-serif;
 
   /* ---- 阴影 ---- */
-  --shadow-primary: 0 4px 12px rgba(72, 187, 120, 0.25);
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04), 0 8px 32px rgba(15, 23, 42, 0.06);
+  --shadow-primary: 0 4px 12px rgba(4, 120, 87, 0.25);
+  --shadow-card:
+    0 1px 3px rgba(0, 0, 0, 0.04), 0 8px 32px rgba(15, 23, 42, 0.06);
 }
