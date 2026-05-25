@@ -1,215 +1,330 @@
 <template>
   <div class="page-bg">
-    <!-- 主内容：左侧品牌 + 右侧登录卡片 -->
-    <div v-if="!auth.currentUser.value && !auth.isLoading.value" class="main-content">
-      <!-- 品牌区（左侧） -->
-      <div class="brand-header">
-        <div class="brand-icon">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-          </svg>
-        </div>
-        <h1 class="brand-name">AI 旅行助手</h1>
-        <p class="brand-tagline">你的智能旅行伙伴</p>
-      </div>
-
-      <!-- 登录/注册卡片（右侧） -->
-      <div class="auth-card">
-        <!-- 下划线式 Tab -->
-        <div class="tabs">
-          <button
-            type="button"
-            :class="['tab', { active: activeTab === 'login' }]"
-            @click="activeTab = 'login'"
-          >
-            登录
-          </button>
-          <button
-            type="button"
-            :class="['tab', { active: activeTab === 'register' }]"
-            @click="activeTab = 'register'"
-          >
-            注册
-          </button>
-          <div
-            class="tab-indicator"
-            :style="{ transform: activeTab === 'register' ? 'translateX(100%)' : 'translateX(0)' }"
-          />
-        </div>
-
-        <form class="form" @submit.prevent="handleSubmit">
-          <div class="field">
-            <label class="label">用户名</label>
-            <div class="input-wrapper">
-              <svg
-                class="input-icon"
-                xmlns="http://www.w3.org/2000/svg"
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                <circle cx="12" cy="7" r="4" />
-              </svg>
-              <input
-                v-model="form.username"
-                type="text"
-                class="input"
-                :placeholder="activeTab === 'login' ? '请输入用户名' : '请输入用户名（3-20位）'"
-                required
-                minlength="3"
-                maxlength="20"
-                autocomplete="username"
-              />
-            </div>
-          </div>
-
-          <div class="field">
-            <div class="label-row">
-              <label class="label">密码</label>
-              <button
-                v-if="activeTab === 'login'"
-                type="button"
-                class="forgot-link"
-                @click="handleForgot"
-              >
-                忘记密码？
-              </button>
-            </div>
-            <div class="input-wrapper">
-              <svg
-                class="input-icon"
-                xmlns="http://www.w3.org/2000/svg"
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-              </svg>
-              <input
-                v-model="form.password"
-                type="password"
-                class="input"
-                :placeholder="activeTab === 'login' ? '请输入密码' : '请设置密码（6-50位）'"
-                required
-                minlength="6"
-                maxlength="50"
-                :autocomplete="activeTab === 'login' ? 'current-password' : 'new-password'"
-              />
-            </div>
-          </div>
-
-          <Transition name="fade">
-            <p v-if="errorMsg" class="error">{{ errorMsg }}</p>
-          </Transition>
-
-          <button type="submit" :disabled="submitting" class="submit-btn">
-            <span v-if="submitting" class="btn-spinner" />
-            <span>{{ activeTab === 'login' ? '登录' : '注册' }}</span>
-          </button>
-        </form>
-
-        <!-- 分割线 -->
-        <div class="divider">
-          <span class="divider-text">其他登录方式</span>
-        </div>
-
-        <!-- 微信扫码卡片 -->
-        <button type="button" class="wechat-card" @click="handleWechatLogin">
-          <div class="phone-frame">
-            <div class="phone-notch" />
-            <div class="phone-screen">
-              <svg
-                class="qr-pattern"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 32 32"
-                fill="currentColor"
-              >
-                <path
-                  d="M0 0h12v12H0zM4 4h4v4H4zM20 0h12v12H20zM24 4h4v4h-4zM0 20h12v12H0zM4 24h4v4H4zM14 0h2v2h-2zM18 0h2v2h-2zM14 4h2v4h-2zM14 10h6v2h-6zM20 14h2v2h-2zM24 14h4v2h-4zM30 14h2v2h-2zM14 14h4v2h-4zM16 16h2v2h-2zM14 18h2v2h-2zM18 20h2v2h-2zM22 18h2v4h-2zM26 20h6v2h-6zM14 22h4v2h-4zM18 24h2v2h-2zM20 26h2v2h-2zM24 24h2v2h-2zM26 26h2v2h-2zM28 24h4v2h-4zM30 28h2v2h-2zM14 28h2v4h-2zM18 28h4v2h-4zM18 30h2v2h-2zM22 30h2v2h-2zM24 28h2v4h-2zM28 30h2v2h-2z"
-                />
-              </svg>
-            </div>
-          </div>
-          <p class="wechat-text">
+    <div v-if="!auth.currentUser.value && !auth.isLoading.value" class="auth-wrapper">
+      <!-- ===== 左侧品牌面板 ===== -->
+      <div class="brand-panel">
+        <div class="brand-top">
+          <div class="brand-logo">
             <svg
-              class="wechat-mini-icon"
               xmlns="http://www.w3.org/2000/svg"
-              width="14"
-              height="14"
+              width="22"
+              height="22"
               viewBox="0 0 24 24"
               fill="currentColor"
             >
-              <path
-                d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.704-1.414 3.973-2.098 6.32-2.193a9.446 9.446 0 0 0-.482-1.573C16.324 3.606 12.868 2.19 8.69 2.189Z"
-              />
-              <path
-                d="M24 16.147c0-3.081-2.892-5.587-6.468-5.587-3.569 0-6.468 2.506-6.468 5.587 0 3.081 2.899 5.587 6.468 5.587a7.86 7.86 0 0 0 2.17-.306l1.457.862a.255.255 0 0 0 .128.04.223.223 0 0 0 .223-.223c0-.053-.011-.106-.037-.16l-.302-1.141a.466.466 0 0 1 .167-.512c1.424-1.061 2.662-2.498 2.662-4.147Z"
-              />
+              <path d="M12 2l1.8 5.4H19l-4.3 3.2 1.6 5-4.3-3.1-4.3 3.1 1.6-5L5 7.4h5.2L12 2z" />
             </svg>
-            使用<strong>微信</strong>扫码快速登录
-          </p>
-        </button>
+          </div>
+          <span class="brand-name">AI Travel Companion</span>
+        </div>
 
-        <p class="switch-hint">
-          {{ activeTab === 'login' ? '还没有账号？' : '已有账号？' }}
-          <button
-            type="button"
-            class="switch-link"
-            @click="activeTab = activeTab === 'login' ? 'register' : 'login'"
-          >
-            {{ activeTab === 'login' ? '立即注册' : '去登录' }}
-          </button>
-        </p>
+        <div class="brand-content">
+          <h1 class="brand-headline">
+            开启您的<br />
+            <span class="headline-accent">轻盈探索</span>之旅
+          </h1>
+          <p class="brand-desc">
+            智能规划，压力全消。我们用 AI 为您打造专属的、如清风般自在的旅行体验。
+          </p>
+        </div>
+
+        <div class="brand-illustration">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 240" class="landscape-svg">
+            <defs>
+              <linearGradient id="skyG" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#c5ede3" />
+                <stop offset="100%" stop-color="#eaf7f2" />
+              </linearGradient>
+              <linearGradient id="waterG" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#aeddd1" stop-opacity="0.85" />
+                <stop offset="100%" stop-color="#8fcec2" stop-opacity="0.5" />
+              </linearGradient>
+              <linearGradient id="m1G" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#5aad97" />
+                <stop offset="100%" stop-color="#3a8878" />
+              </linearGradient>
+              <linearGradient id="m2G" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#3d9080" />
+                <stop offset="100%" stop-color="#1f6055" />
+              </linearGradient>
+            </defs>
+            <rect width="560" height="240" fill="url(#skyG)" rx="16" />
+            <polygon
+              points="0,148 70,65 155,125 245,48 335,115 420,42 505,102 560,78 560,148"
+              fill="#72c4ae"
+              opacity="0.45"
+            />
+            <polygon
+              points="0,168 65,95 148,148 235,72 318,135 405,62 488,118 560,90 560,168"
+              fill="url(#m1G)"
+              opacity="0.8"
+            />
+            <polygon
+              points="0,188 108,112 212,165 308,96 408,155 560,108 560,188"
+              fill="url(#m2G)"
+            />
+            <rect x="0" y="188" width="560" height="52" fill="url(#waterG)" />
+            <line
+              x1="90"
+              y1="200"
+              x2="220"
+              y2="200"
+              stroke="white"
+              stroke-width="1"
+              stroke-opacity="0.25"
+            />
+            <line
+              x1="280"
+              y1="207"
+              x2="420"
+              y2="207"
+              stroke="white"
+              stroke-width="0.8"
+              stroke-opacity="0.2"
+            />
+            <line
+              x1="45"
+              y1="218"
+              x2="175"
+              y2="218"
+              stroke="white"
+              stroke-width="0.8"
+              stroke-opacity="0.15"
+            />
+          </svg>
+        </div>
+
+        <p class="brand-copyright">© 2024 AI Travel Companion. Built for breezy exploration.</p>
+      </div>
+
+      <!-- ===== 右侧表单面板 ===== -->
+      <div class="form-panel">
+        <div class="form-inner">
+          <div class="form-header">
+            <h2 class="form-title">{{ activeTab === 'register' ? '创建账户' : '欢迎回来' }}</h2>
+            <p class="form-subtitle">
+              {{
+                activeTab === 'register'
+                  ? '注册账户，开启您的旅行规划'
+                  : '请登录您的账户，继续您的旅行规划'
+              }}
+            </p>
+          </div>
+
+          <!-- 账号登录 / 账号注册 Tabs -->
+          <div class="tabs">
+            <button
+              type="button"
+              :class="['tab', { active: activeTab === 'login' }]"
+              @click="switchTab('login')"
+            >
+              账号登录
+            </button>
+            <button
+              type="button"
+              :class="['tab', { active: activeTab === 'register' }]"
+              @click="switchTab('register')"
+            >
+              账号注册
+            </button>
+            <div
+              class="tab-indicator"
+              :style="{
+                transform: activeTab === 'register' ? 'translateX(100%)' : 'translateX(0)',
+              }"
+            />
+          </div>
+
+          <!-- 表单 -->
+          <form class="form" @submit.prevent="handleSubmit">
+            <div class="field">
+              <label class="label">用户名</label>
+              <div class="input-wrapper">
+                <svg
+                  class="input-icon"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+                <input
+                  v-model="form.username"
+                  type="text"
+                  class="input"
+                  :placeholder="
+                    activeTab === 'register' ? '请输入用户名（3-20位）' : '请输入用户名'
+                  "
+                  required
+                  minlength="3"
+                  maxlength="20"
+                  autocomplete="username"
+                />
+              </div>
+            </div>
+
+            <div class="field">
+              <div class="label-row">
+                <label class="label">密码</label>
+                <button
+                  v-if="activeTab === 'login'"
+                  type="button"
+                  class="forgot-link"
+                  @click="handleForgot"
+                >
+                  忘记密码？
+                </button>
+              </div>
+              <div class="input-wrapper">
+                <svg
+                  class="input-icon"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+                <input
+                  v-model="form.password"
+                  :type="showPassword ? 'text' : 'password'"
+                  class="input input-has-toggle"
+                  :placeholder="activeTab === 'register' ? '请设置密码（6-50位）' : '请输入密码'"
+                  required
+                  minlength="6"
+                  maxlength="50"
+                  :autocomplete="activeTab === 'register' ? 'new-password' : 'current-password'"
+                />
+                <button type="button" class="toggle-password" @click="showPassword = !showPassword">
+                  <svg
+                    v-if="showPassword"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path
+                      d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"
+                    />
+                    <path
+                      d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"
+                    />
+                    <line x1="1" y1="1" x2="23" y2="23" />
+                  </svg>
+                  <svg
+                    v-else
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <Transition name="fade">
+              <p v-if="errorMsg" class="error">{{ errorMsg }}</p>
+            </Transition>
+
+            <button type="submit" :disabled="submitting" class="submit-btn">
+              <span v-if="submitting" class="btn-spinner" />
+              <span>{{ activeTab === 'register' ? '立即注册' : '立即登录' }}</span>
+              <svg
+                v-if="!submitting"
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="5" y1="12" x2="19" y2="12" />
+                <polyline points="12 5 19 12 12 19" />
+              </svg>
+            </button>
+          </form>
+
+          <!-- 第三方登录 -->
+          <div class="third-party">
+            <div class="divider">
+              <span class="divider-text">第三方登录方式</span>
+            </div>
+            <button type="button" class="wechat-btn" @click="handleWechatLogin">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path
+                  d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.704-1.414 3.973-2.098 6.32-2.193a9.446 9.446 0 0 0-.482-1.573C16.324 3.606 12.868 2.19 8.69 2.189Z"
+                />
+                <path
+                  d="M24 16.147c0-3.081-2.892-5.587-6.468-5.587-3.569 0-6.468 2.506-6.468 5.587 0 3.081 2.899 5.587 6.468 5.587a7.86 7.86 0 0 0 2.17-.306l1.457.862a.255.255 0 0 0 .128.04.223.223 0 0 0 .223-.223c0-.053-.011-.106-.037-.16l-.302-1.141a.466.466 0 0 1 .167-.512c1.424-1.061 2.662-2.498 2.662-4.147Z"
+                />
+              </svg>
+              <span>微信登录</span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- 加载中 / 已登录跳转中 -->
+    <!-- 加载中 -->
     <div v-else class="loading-state">
       <div class="loading-spinner" />
       <p>加载中...</p>
     </div>
 
-    <!-- 页脚 -->
-    <footer v-if="!auth.currentUser.value && !auth.isLoading.value" class="page-footer">
-      <a href="#" @click.prevent>服务条款</a>
-      <span class="footer-sep">·</span>
-      <a href="#" @click.prevent>隐私政策</a>
-    </footer>
-
-    <!-- ====== 微信扫码登录弹窗 ====== -->
+    <!-- 微信扫码弹窗 -->
     <UModal v-model:open="showQrModal" title="微信扫码登录" :ui="{ content: 'sm:max-w-md' }">
       <template #body>
         <div class="qr-container">
-          <canvas ref="qrCanvasRef" class="qr-canvas" />
-          <p v-if="qrStatus === 'pending'" class="qr-hint">
+          <div v-if="qrStatus === 'loading'" class="qr-loading">
             <span class="qr-spinner" />
-            请使用微信扫描二维码
-          </p>
-          <p v-else-if="qrStatus === 'expired'" class="qr-hint qr-error">
-            二维码已过期，请刷新重试
-          </p>
+            <p>正在生成二维码...</p>
+          </div>
+          <template v-else>
+            <canvas ref="qrCanvasRef" class="qr-canvas" />
+            <p v-if="qrStatus === 'pending'" class="qr-hint">
+              <span class="qr-spinner-sm" />
+              请使用微信扫描二维码
+            </p>
+            <p v-else-if="qrStatus === 'expired'" class="qr-hint qr-error">
+              二维码已过期
+              <button type="button" class="refresh-btn" @click="loadWechatQr">刷新</button>
+            </p>
+          </template>
         </div>
       </template>
     </UModal>
@@ -219,13 +334,10 @@
 <script lang="ts" setup>
 import QRCode from 'qrcode'
 
-/**
- * 首页 — 登录 / 注册 / 聊天入口
- */
-
 const auth = useAuth()
 
 const activeTab = ref<'login' | 'register'>('login')
+const showPassword = ref(false)
 
 const form = reactive({
   username: '',
@@ -235,7 +347,7 @@ const form = reactive({
 const submitting = ref(false)
 const errorMsg = ref('')
 
-// ========== 页面初始化：已登录则直接跳转 ==========
+// ========== 页面初始化 ==========
 onMounted(async () => {
   await auth.fetchUser()
   if (auth.currentUser.value) {
@@ -243,21 +355,28 @@ onMounted(async () => {
   }
 })
 
+// ========== 切换 Tab ==========
+const switchTab = (tab: 'login' | 'register') => {
+  activeTab.value = tab
+  errorMsg.value = ''
+  form.username = ''
+  form.password = ''
+  showPassword.value = false
+}
+
 // ========== 提交表单 ==========
 const handleSubmit = async () => {
   errorMsg.value = ''
   submitting.value = true
-
   try {
-    if (activeTab.value === 'login') {
-      await auth.login(form.username, form.password)
-    } else {
+    if (activeTab.value === 'register') {
       await auth.register(form.username, form.password)
+    } else {
+      await auth.login(form.username, form.password)
     }
     await navigateTo('/')
   } catch (err: any) {
     errorMsg.value = err.message || '操作失败，请重试'
-    submitting.value = false
   } finally {
     submitting.value = false
   }
@@ -271,22 +390,26 @@ const handleForgot = () => {
 // ========== 微信扫码登录 ==========
 const showQrModal = ref(false)
 const qrCanvasRef = ref<HTMLCanvasElement | null>(null)
-const qrStatus = ref<'pending' | 'expired' | 'scanning'>('pending')
+const qrStatus = ref<'loading' | 'pending' | 'expired'>('loading')
 let pollTimer: ReturnType<typeof setInterval> | null = null
 
-const handleWechatLogin = async () => {
+const stopPoll = () => {
   if (pollTimer) {
     clearInterval(pollTimer)
     pollTimer = null
   }
+}
+
+const loadWechatQr = async () => {
+  stopPoll()
+  qrStatus.value = 'loading'
+  errorMsg.value = ''
 
   try {
     const resp = await fetch('/api/auth/wechat/login')
     const { authUrl, state } = await resp.json()
 
-    showQrModal.value = true
     qrStatus.value = 'pending'
-
     await nextTick()
     if (qrCanvasRef.value) {
       await QRCode.toCanvas(qrCanvasRef.value, authUrl, { width: 240, margin: 2 })
@@ -296,162 +419,215 @@ const handleWechatLogin = async () => {
       try {
         const r = await fetch(`/api/auth/wechat/status?state=${state}`)
         const data = await r.json()
-
         if (data.status === 'confirmed' && data.token) {
-          clearInterval(pollTimer!)
-          pollTimer = null
+          stopPoll()
           showQrModal.value = false
-
           auth.token.value = data.token
           await auth.fetchUser()
           await navigateTo('/')
         } else if (data.status === 'expired') {
-          clearInterval(pollTimer!)
-          pollTimer = null
+          stopPoll()
           qrStatus.value = 'expired'
         }
       } catch {
-        //
+        /* ignore */
       }
     }, 1500)
   } catch (err: any) {
     errorMsg.value = err.message || '获取二维码失败'
+    showQrModal.value = false
   }
 }
 
-watch(showQrModal, (val: boolean) => {
-  if (!val && pollTimer) {
-    clearInterval(pollTimer)
-    pollTimer = null
-  }
+const handleWechatLogin = async () => {
+  showQrModal.value = true
+  await loadWechatQr()
+}
+
+watch(showQrModal, (val) => {
+  if (!val) stopPoll()
 })
 
-onUnmounted(() => {
-  if (pollTimer) {
-    clearInterval(pollTimer)
-    pollTimer = null
-  }
-})
+onUnmounted(stopPoll)
 </script>
 
 <style scoped>
+/* ====== 页面 ====== */
 .page-bg {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  padding: 2rem 1rem;
-  /* Aether Mint：从浅薄荷渐变到浅灰，柔和的背景 */
-  background: linear-gradient(
-    160deg,
-    var(--color-mint-50) 0%,
-    var(--color-stone-50) 50%,
-    var(--color-mint-50) 100%
-  );
-  font-family: var(--font-sans);
+  padding: 2rem;
+  background: #f6fbf6;
+  font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+  box-sizing: border-box;
 }
 
-/* ====== 主内容：左品牌 + 右卡片 ====== */
-.main-content {
+/* ====== 双栏卡片 ====== */
+.auth-wrapper {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4rem;
-  flex-wrap: wrap;
-  max-width: 960px;
   width: 100%;
+  max-width: 1200px;
+  min-height: 700px;
+  border-radius: 2rem;
+  overflow: hidden;
+  box-shadow:
+    0 2px 16px rgba(0, 0, 0, 0.06),
+    0 1px 4px rgba(0, 0, 0, 0.04);
 }
 
-/* ====== 品牌区（左侧） ====== */
-.brand-header {
+/* ====== 左侧品牌面板 ====== */
+.brand-panel {
+  flex: 0 0 45%;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
-  max-width: 320px;
+  padding: 3rem 3rem 2rem;
+  background: #effff9;
+  position: relative;
+  overflow: hidden;
 }
 
-.brand-icon {
-  display: inline-flex;
+.brand-top {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 2.5rem;
+}
+
+.brand-logo {
+  display: flex;
   align-items: center;
   justify-content: center;
-  width: 52px;
-  height: 52px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, var(--color-mint-700), var(--color-mint-800));
-  color: white;
-  margin-bottom: 1rem;
-  box-shadow: 0 4px 12px rgba(4, 120, 87, 0.25);
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: rgba(0, 108, 82, 0.1);
+  color: #006c52;
+  flex-shrink: 0;
 }
 
 .brand-name {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--color-secondary);
-  letter-spacing: -0.02em;
-  margin: 0;
-  line-height: 1.2;
-}
-
-.brand-tagline {
-  margin-top: 0.6rem;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
   font-size: 1rem;
-  color: var(--color-stone-500);
-  line-height: 1.5;
+  font-weight: 700;
+  color: #006c52;
+  letter-spacing: -0.01em;
 }
 
-@media (max-width: 768px) {
-  .main-content {
-    gap: 2rem;
-  }
-  .brand-header {
-    align-items: center;
-    text-align: center;
-    max-width: 100%;
-  }
-  .brand-name {
-    font-size: 1.6rem;
-  }
-  .brand-tagline {
-    font-size: 0.9rem;
-  }
+.brand-content {
+  flex: 1;
 }
 
-/* ====== 主卡片 ====== */
-.auth-card {
+.brand-headline {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-size: 2.5rem;
+  font-weight: 800;
+  line-height: 1.2;
+  color: #171d1a;
+  margin: 0 0 1.1rem;
+  letter-spacing: -0.02em;
+}
+
+.headline-accent {
+  color: #006c52;
+}
+
+.brand-desc {
+  font-size: 0.9rem;
+  color: #3e4944;
+  line-height: 1.75;
+  margin: 0;
+  max-width: 320px;
+}
+
+.brand-illustration {
+  margin-top: 2rem;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.landscape-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.brand-copyright {
+  margin-top: 1.25rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #6e7a74;
+  text-transform: uppercase;
+  margin-bottom: 0;
+}
+
+/* ====== 右侧表单面板 ====== */
+.form-panel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  background: #ffffff;
+  overflow-y: auto;
+}
+
+.form-inner {
   width: 100%;
   max-width: 400px;
-  padding: 2rem 2rem 1.75rem;
-  border-radius: 16px;
-  background: #ffffff;
-  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
 }
 
-/* ====== 下划线式 Tab ====== */
+.form-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.form-title {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #171d1a;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.form-subtitle {
+  font-size: 0.875rem;
+  color: #3e4944;
+  margin: 0;
+}
+
+/* ====== Tabs ====== */
 .tabs {
   position: relative;
   display: flex;
-  margin-bottom: 1.75rem;
-  border-bottom: 1px solid var(--color-stone-200);
+  border-bottom: 1px solid rgba(189, 201, 194, 0.4);
 }
 
 .tab {
   flex: 1;
   position: relative;
   z-index: 1;
-  padding: 0.75rem 0;
+  padding: 0.6rem 0;
   border: none;
   background: transparent;
-  font-size: 0.95rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  color: var(--color-stone-400);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #6e7a74;
   cursor: pointer;
   transition: color 0.2s;
 }
 
 .tab.active {
-  color: var(--color-mint-700);
+  color: #006c52;
 }
 
 .tab-indicator {
@@ -460,7 +636,7 @@ onUnmounted(() => {
   left: 0;
   width: 50%;
   height: 2px;
-  background: var(--color-mint-700);
+  background: #006c52;
   border-radius: 2px;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -469,13 +645,13 @@ onUnmounted(() => {
 .form {
   display: flex;
   flex-direction: column;
-  gap: 1.1rem;
+  gap: 1rem;
 }
 
 .field {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.45rem;
 }
 
 .label-row {
@@ -485,18 +661,21 @@ onUnmounted(() => {
 }
 
 .label {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  color: var(--color-secondary);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #3e4944;
 }
 
 .forgot-link {
   background: none;
   border: none;
   padding: 0;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  color: var(--color-mint-700);
+  letter-spacing: 0.04em;
+  color: #006c52;
   cursor: pointer;
 }
 
@@ -513,71 +692,97 @@ onUnmounted(() => {
   left: 14px;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--color-stone-400);
+  color: rgba(62, 73, 68, 0.5);
   pointer-events: none;
   transition: color 0.2s;
 }
 
 .input-wrapper:focus-within .input-icon {
-  color: var(--color-mint-700);
+  color: #006c52;
 }
 
 .input {
   width: 100%;
-  padding: 0.75rem 1rem 0.75rem 2.65rem;
-  border: 1.5px solid transparent;
-  border-radius: 10px;
+  padding: 0.875rem 1rem 0.875rem 2.75rem;
+  border: 1px solid #bdc9c2;
+  border-radius: 12px;
   font-size: 0.95rem;
-  background: var(--color-stone-50);
+  font-family: inherit;
+  background: transparent;
   outline: none;
-  transition: all 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
   box-sizing: border-box;
-  color: var(--color-secondary);
+  color: #171d1a;
+}
+
+.input.input-has-toggle {
+  padding-right: 2.75rem;
 }
 
 .input::placeholder {
-  color: var(--color-stone-400);
+  color: rgba(62, 73, 68, 0.45);
 }
 
 .input:focus {
-  background: #ffffff;
-  border-color: var(--color-mint-700);
-  box-shadow: 0 0 0 3px rgba(4, 120, 87, 0.15);
+  border-color: #006c52;
+  box-shadow: 0 0 0 3px rgba(143, 246, 208, 0.35);
 }
 
+.toggle-password {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: rgba(62, 73, 68, 0.5);
+  display: flex;
+  align-items: center;
+  transition: color 0.2s;
+}
+
+.toggle-password:hover {
+  color: #006c52;
+}
+
+/* ====== 提交按钮 ====== */
 .submit-btn {
-  margin-top: 0.4rem;
   width: 100%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.75rem 1rem;
+  padding: 0.9rem 1.5rem;
   border: none;
-  border-radius: 10px;
-  background: var(--color-mint-700);
-  color: #fff;
-  font-size: 0.95rem;
+  border-radius: 9999px;
+  background: #006c52;
+  color: #ffffff;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition:
-    background 0.2s,
+    filter 0.2s,
     transform 0.1s,
     box-shadow 0.2s;
-  box-shadow: 0 2px 6px rgba(4, 120, 87, 0.25);
+  box-shadow: 0 2px 8px rgba(0, 108, 82, 0.25);
 }
 
 .submit-btn:hover:not(:disabled) {
-  background: var(--color-mint-800);
-  box-shadow: 0 4px 10px rgba(4, 120, 87, 0.3);
+  filter: brightness(1.1);
+  box-shadow: 0 4px 14px rgba(0, 108, 82, 0.3);
 }
 
 .submit-btn:active:not(:disabled) {
-  transform: translateY(1px);
+  transform: scale(0.98);
 }
 
 .submit-btn:disabled {
-  opacity: 0.7;
+  opacity: 0.65;
   cursor: not-allowed;
 }
 
@@ -592,16 +797,77 @@ onUnmounted(() => {
 
 /* ====== 错误提示 ====== */
 .error {
-  color: #dc2626;
+  color: #ba1a1a;
   font-size: 0.85rem;
   text-align: center;
   padding: 0.55rem 1rem;
-  background: #fef2f2;
+  background: #ffdad6;
   border-radius: 8px;
-  border: 1px solid #fecaca;
   margin: 0;
 }
 
+/* ====== 第三方登录 ====== */
+.third-party {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(189, 201, 194, 0.4);
+}
+
+.divider-text {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(110, 122, 116, 0.6);
+  white-space: nowrap;
+}
+
+.wechat-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid #bdc9c2;
+  border-radius: 9999px;
+  background: transparent;
+  color: #171d1a;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    transform 0.1s;
+}
+
+.wechat-btn svg {
+  color: #07c160;
+}
+
+.wechat-btn:hover {
+  background: #f0f5f0;
+}
+
+.wechat-btn:active {
+  transform: scale(0.97);
+}
+
+/* ====== 动画 ====== */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.2s;
@@ -611,183 +877,31 @@ onUnmounted(() => {
   opacity: 0;
 }
 
-/* ====== 分割线 ====== */
-.divider {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin: 1.5rem 0 1rem;
-}
-
-.divider::before,
-.divider::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--color-stone-200);
-}
-
-.divider-text {
-  font-size: 0.7rem;
-  color: var(--color-stone-400);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-/* ====== 微信扫码卡片 ====== */
-.wechat-card {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 1.25rem;
-  border: 1px solid var(--color-stone-200);
-  border-radius: 12px;
-  background: var(--color-stone-50);
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.wechat-card:hover {
-  border-color: var(--color-mint-300);
-  background: var(--color-mint-50);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(4, 120, 87, 0.1);
-}
-
-.phone-frame {
-  position: relative;
-  width: 64px;
-  height: 90px;
-  border: 2px solid var(--color-stone-300);
-  border-radius: 10px;
-  background: var(--color-mint-100);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 6px;
-  box-sizing: border-box;
-}
-
-.phone-notch {
-  position: absolute;
-  top: 3px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 18px;
-  height: 3px;
-  border-radius: 2px;
-  background: var(--color-stone-300);
-}
-
-.phone-screen {
-  width: 100%;
-  height: 100%;
-  background: #ffffff;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 4px;
-  box-sizing: border-box;
-}
-
-.qr-pattern {
-  width: 100%;
-  height: 100%;
-  color: var(--color-secondary);
-}
-
-.wechat-text {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  margin: 0;
-  font-size: 0.85rem;
-  color: var(--color-stone-600);
-}
-
-.wechat-text strong {
-  color: var(--color-mint-700);
-  font-weight: 600;
-}
-
-.wechat-mini-icon {
-  color: var(--color-mint-700);
-  flex-shrink: 0;
-}
-
-/* ====== 底部切换 ====== */
-.switch-hint {
-  text-align: center;
-  margin-top: 1.25rem;
-  margin-bottom: 0;
-  font-size: 0.85rem;
-  color: var(--color-stone-400);
-}
-
-.switch-link {
-  background: none;
-  border: none;
-  color: var(--color-mint-700);
-  font-weight: 600;
-  cursor: pointer;
-  font-size: 0.85rem;
-  padding: 0;
-}
-
-.switch-link:hover {
-  text-decoration: underline;
-}
-
-/* ====== 加载 ====== */
-.loading-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-  color: var(--color-stone-500);
-}
-
-.loading-spinner {
-  width: 36px;
-  height: 36px;
-  border: 3px solid var(--color-stone-200);
-  border-top-color: var(--color-mint-700);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
 @keyframes spin {
   to {
     transform: rotate(360deg);
   }
 }
 
-/* ====== 页脚 ====== */
-.page-footer {
-  margin-top: 1.5rem;
+/* ====== 加载状态 ====== */
+.loading-state {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0.6rem;
-  font-size: 0.8rem;
-  color: var(--color-stone-400);
+  justify-content: center;
+  gap: 1rem;
+  min-height: 100vh;
+  width: 100%;
+  color: #6e7a74;
 }
 
-.page-footer a {
-  color: var(--color-stone-500);
-  text-decoration: none;
-  transition: color 0.15s;
-}
-
-.page-footer a:hover {
-  color: var(--color-mint-700);
-}
-
-.footer-sep {
-  color: var(--color-stone-300);
+.loading-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid #bdc9c2;
+  border-top-color: #006c52;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
 }
 
 /* ====== 微信扫码弹窗 ====== */
@@ -796,33 +910,94 @@ onUnmounted(() => {
   flex-direction: column;
   align-items: center;
   padding: 1rem 0;
+  gap: 1rem;
+}
+
+.qr-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  color: #6e7a74;
+  font-size: 0.875rem;
+  padding: 2rem 0;
 }
 
 .qr-canvas {
-  border: 1px solid var(--color-stone-200);
+  border: 1px solid #bdc9c2;
   border-radius: 12px;
 }
 
 .qr-hint {
-  margin-top: 1rem;
-  font-size: 0.9rem;
-  color: var(--color-stone-500);
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #3e4944;
+  margin: 0;
 }
 
 .qr-error {
-  color: #e53e3e;
+  color: #ba1a1a;
 }
 
 .qr-spinner {
   display: inline-block;
-  width: 16px;
-  height: 16px;
-  border: 2px solid var(--color-stone-200);
-  border-top-color: var(--color-mint-700);
+  width: 28px;
+  height: 28px;
+  border: 3px solid #bdc9c2;
+  border-top-color: #006c52;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
+}
+
+.qr-spinner-sm {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid #bdc9c2;
+  border-top-color: #006c52;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.refresh-btn {
+  padding: 0.25rem 0.75rem;
+  border: 1px solid #006c52;
+  border-radius: 9999px;
+  background: transparent;
+  color: #006c52;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.refresh-btn:hover {
+  background: #006c52;
+  color: white;
+}
+
+/* ====== 响应式 ====== */
+@media (max-width: 768px) {
+  .page-bg {
+    padding: 1rem;
+    align-items: flex-start;
+  }
+  .auth-wrapper {
+    border-radius: 1.25rem;
+    min-height: auto;
+  }
+  .brand-panel {
+    display: none;
+  }
+  .form-panel {
+    padding: 2.5rem 1.5rem;
+    align-items: flex-start;
+    padding-top: 3rem;
+  }
+  .form-inner {
+    max-width: 100%;
+  }
 }
 </style>
