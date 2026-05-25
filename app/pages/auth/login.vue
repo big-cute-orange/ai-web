@@ -218,6 +218,7 @@
 
 <script lang="ts" setup>
 import QRCode from 'qrcode'
+
 /**
  * 首页 — 登录 / 注册 / 聊天入口
  */
